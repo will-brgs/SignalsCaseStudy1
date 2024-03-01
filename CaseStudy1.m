@@ -18,39 +18,39 @@ C = 10e-6; % Consider resistance will be constant at 10uF, R will change to alte
 R_Lo = zeros(5,1);
 R_Hi = zeros(5,1);
 % Band 1: 60Hz
-cutoff_Lo = 1;
-R_Hi(1) = 1/(2*pi*C*cutoff_Lo);
+cutoff_Hi = 1;
+R_Hi(1) = 1/(2*pi*C*cutoff_Hi);
 
-cutoff_Hi = 119;
-R_Lo(1) = 1/(2*pi*C*cutoff_Hi);
+cutoff_Lo = 119;
+R_Lo(1) = 1/(2*pi*C*cutoff_Lo);
 
 %Band 2: 230Hz
-cutoff_Lo = 119;
-R_Hi(2) = 1/(2*pi*C*cutoff_Lo);
+cutoff_Hi = 119;
+R_Hi(2) = 1/(2*pi*C*cutoff_Hi);
 
-cutoff_Hi = 341;
-R_Lo(2) = 1/(2*pi*C*cutoff_Hi);
+cutoff_Lo = 341;
+R_Lo(2) = 1/(2*pi*C*cutoff_Lo);
 
 %Band 3: 910Hz
-cutoff_Lo = 341;
-R_Hi(3) = 1/(2*pi*C*cutoff_Lo);
+cutoff_Hi = 341;
+R_Hi(3) = 1/(2*pi*C*cutoff_Hi);
 
-cutoff_Hi = 1479;
-R_Lo(3) = 1/(2*pi*C*cutoff_Hi);
+cutoff_Lo = 1479;
+R_Lo(3) = 1/(2*pi*C*cutoff_Lo);
 
 %Band 4: 3kHz
-cutoff_Lo = 1479;
-R_Hi(4) = 1/(2*pi*C*cutoff_Lo);
+cutoff_Hi = 1479;
+R_Hi(4) = 1/(2*pi*C*cutoff_Hi);
 
-cutoff_Hi = 4521;
-R_Lo(4) = 1/(2*pi*C*cutoff_Hi);
+cutoff_Lo = 4521;
+R_Lo(4) = 1/(2*pi*C*cutoff_Lo);
 
 %band 5: 14kHz
-cutoff_Lo = 4521;
-R_Hi(5) = 1/(2*pi*C*cutoff_Lo);
+cutoff_Hi = 4521;
+R_Hi(5) = 1/(2*pi*C*cutoff_Hi);
 
-cutoff_Hi = 23479;
-R_Lo(5) = 1/(2*pi*C*cutoff_Hi);
+cutoff_Lo = 23479;
+R_Lo(5) = 1/(2*pi*C*cutoff_Lo);
 
 %% Task 1: Initialize a and b Coefficients for lsim of bands
 
@@ -63,8 +63,8 @@ b_Lo = 1./(C.*R_Lo);
 %HighPass Filter Coefficients
 a_Hi = zeros(5, 1);
 a_Hi(:,1) = 1;
-a_Hi(:,2) = 1./(C.*R_Lo);
-b_Hi = zeros(5, 1);
+a_Hi(:,2) = 1./(C.*R_Hi);
+b_Hi = zeros(5, 2);
 b_Hi(:,1) = 1;
 
 %% Import Chirp
@@ -85,17 +85,43 @@ subplot(3,1,2), plot(fchirp,(ychirpMA)); title('DT Moving Average')
 subplot(3,1,3), plot(fchirp,(ychirpHPF)); title('DT Highpass Filter'), xlabel('Frequency (Hz)')
 % to visualize with log or linear scale for frequency or amplitude, use this code accordingly
 for i = 1:3, subplot(3,1,i), set(gca,'XScale','log'), set(gca,'YScale','linear'), axis tight, end
-%% Task 1: 
-output = xchirp;
-bode_range = logspace(1, 4, length(fchirp));
+%% Bode Plot Test
+% output = xchirp;
+bode_range = logspace(1, 5);
 outputSum = zeros(length(fchirp), 1);
-for i = 1:5
-output_filter = lsim(b_Lo(i,:),a_Lo(i,:), output,fchirp);
-output_filter = lsim(b_Hi(i,:),a_Hi(i,:), output_filter,fchirp);
-outputSum = outputSum + output_filter;
+sample_times = 0:1/Fs:3;
+% for i = 1
+% output_filter = lsim(b_Lo(i,:),a_Lo(i,:), output,fchirp);
+% output_filter = lsim(b_Hi(i,:),a_Hi(i,:), output_filter,fchirp);
+% outputSum = outputSum + output_filter;
+% end
+
+for i = 1:length(bode_range)
+    freq_current = bode_range(i);
+    x = exp(1j*freq_current*sample_times);
+
+
+    x_filter = lsim(b_Lo(3,:),a_Lo(3,:), x, sample_times);
+    x_filter = lsim(b_Hi(3,:),a_Hi(3,:), x_filter, sample_times);
+    % output_low = lsim(b_low, a_low, x, sample_period);
+    % output_high = lsim(b_high, a_high, x, sample_period);
+
+    H_w_band(i) = x_filter(end)/x(end);
 end
-figure, plot(outputSum)
-xscale log;
+
+%Calculate magnitude and angle values of complex gain
+mag_band = 20*log10(H_w_band);
+angle_band = angle((H_w_band)/pi);
+
+hold on
+subplot(2,1,1)
+semilogx(bode_range, mag_band)
+title("High-pass Magnitude")
+
+subplot(2,1,2)
+semilogx(bode_range, angle_band)
+title("High-pass Angle")
+
 %% Read All Audio Files
 
 %Import Blue in Green with Siren
