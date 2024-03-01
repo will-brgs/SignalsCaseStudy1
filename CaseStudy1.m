@@ -15,42 +15,42 @@ disp("leela says hi");
 %% Task 1: Initialize R and C values for desired cutoff frequencies
 C = 10e-6; % Consider resistance will be constant at 10uF, R will change to alter cutoff freq
 % Create a vector of R values for Lo and Hi respectively
-R_Hi = zeros(5,1);
 R_Lo = zeros(5,1);
+R_Hi = zeros(5,1);
 % Band 1: 60Hz
 cutoff_Lo = 1;
-R_Lo(1) = 1/(2*pi*C*cutoff_Lo);
+R_Hi(1) = 1/(2*pi*C*cutoff_Lo);
 
 cutoff_Hi = 119;
-R_Hi(1) = 1/(2*pi*C*cutoff_Hi);
+R_Lo(1) = 1/(2*pi*C*cutoff_Hi);
 
 %Band 2: 230Hz
 cutoff_Lo = 119;
-R_Lo(2) = 1/(2*pi*C*cutoff_Lo);
+R_Hi(2) = 1/(2*pi*C*cutoff_Lo);
 
 cutoff_Hi = 341;
-R_Hi(2) = 1/(2*pi*C*cutoff_Hi);
+R_Lo(2) = 1/(2*pi*C*cutoff_Hi);
 
 %Band 3: 910Hz
 cutoff_Lo = 341;
-R_Lo(3) = 1/(2*pi*C*cutoff_Lo);
+R_Hi(3) = 1/(2*pi*C*cutoff_Lo);
 
 cutoff_Hi = 1479;
-R_Hi(3) = 1/(2*pi*C*cutoff_Hi);
+R_Lo(3) = 1/(2*pi*C*cutoff_Hi);
 
 %Band 4: 3kHz
 cutoff_Lo = 1479;
-R_Lo(4) = 1/(2*pi*C*cutoff_Lo);
+R_Hi(4) = 1/(2*pi*C*cutoff_Lo);
 
 cutoff_Hi = 4521;
-R_Hi(4) = 1/(2*pi*C*cutoff_Hi);
+R_Lo(4) = 1/(2*pi*C*cutoff_Hi);
 
 %band 5: 14kHz
 cutoff_Lo = 4521;
-R_Lo(5) = 1/(2*pi*C*cutoff_Lo);
+R_Hi(5) = 1/(2*pi*C*cutoff_Lo);
 
 cutoff_Hi = 23479;
-R_Hi(5) = 1/(2*pi*C*cutoff_Hi);
+R_Lo(5) = 1/(2*pi*C*cutoff_Hi);
 
 %% Task 1: Initialize a and b Coefficients for lsim of bands
 
@@ -87,11 +87,14 @@ subplot(3,1,3), plot(fchirp,(ychirpHPF)); title('DT Highpass Filter'), xlabel('F
 for i = 1:3, subplot(3,1,i), set(gca,'XScale','log'), set(gca,'YScale','linear'), axis tight, end
 %% Task 1: 
 output = xchirp;
+bode_range = logspace(1, 4, length(fchirp));
+outputSum = zeros(length(fchirp), 1);
 for i = 1:5
-output = lsim(b_Lo(i,:),a_Lo(i,:), output,fchirp);
-output = lsim(b_Hi(i,:),a_Hi(i,:), output,fchirp);
+output_filter = lsim(b_Lo(i,:),a_Lo(i,:), output,fchirp);
+output_filter = lsim(b_Hi(i,:),a_Hi(i,:), output_filter,fchirp);
+outputSum = outputSum + output_filter;
 end
-figure, plot(output)
+figure, plot(outputSum, 'XScale','log')
 %% Read All Audio Files
 
 %Import Blue in Green with Siren
