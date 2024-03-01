@@ -8,6 +8,8 @@
 close all
 Fs = 44.1e3; %44.1 kHz Audio Sampling Frequency
 
+disp("leela says hi");
+
 %% Task 1: Design Variable Amplification for 5 Band Frequencies
 % Here we will construct the set of linear systems
 %% Task 1: Initialize R and C values for desired cutoff frequencies
