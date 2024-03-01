@@ -94,7 +94,8 @@ output_filter = lsim(b_Lo(i,:),a_Lo(i,:), output,fchirp);
 output_filter = lsim(b_Hi(i,:),a_Hi(i,:), output_filter,fchirp);
 outputSum = outputSum + output_filter;
 end
-figure, plot(outputSum, 'XScale','log')
+figure, plot(outputSum)
+xscale log;
 %% Read All Audio Files
 
 %Import Blue in Green with Siren
