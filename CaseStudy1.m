@@ -21,35 +21,35 @@ R_Lo = zeros(5,1);
 cutoff_Lo = 1;
 R_Lo(1) = 1/(2*pi*C*cutoff_Lo);
 
-cutoff_Hi = 120;
+cutoff_Hi = 119;
 R_Hi(1) = 1/(2*pi*C*cutoff_Hi);
 
 %Band 2: 230Hz
-cutoff_Lo = 150;
+cutoff_Lo = 119;
 R_Lo(2) = 1/(2*pi*C*cutoff_Lo);
 
-cutoff_Hi = 400;
+cutoff_Hi = 341;
 R_Hi(2) = 1/(2*pi*C*cutoff_Hi);
 
 %Band 3: 910Hz
-cutoff_Lo = 400;
+cutoff_Lo = 341;
 R_Lo(3) = 1/(2*pi*C*cutoff_Lo);
 
-cutoff_Hi = 1.3e3;
+cutoff_Hi = 1479;
 R_Hi(3) = 1/(2*pi*C*cutoff_Hi);
 
 %Band 4: 3kHz
-cutoff_Lo = 1.5e3;
+cutoff_Lo = 1479;
 R_Lo(4) = 1/(2*pi*C*cutoff_Lo);
 
-cutoff_Hi = 5e3;
+cutoff_Hi = 4521;
 R_Hi(4) = 1/(2*pi*C*cutoff_Hi);
 
 %band 5: 14kHz
-cutoff_Lo = 8e3;
+cutoff_Lo = 4521;
 R_Lo(5) = 1/(2*pi*C*cutoff_Lo);
 
-cutoff_Hi = 28e3;
+cutoff_Hi = 23479;
 R_Hi(5) = 1/(2*pi*C*cutoff_Hi);
 
 %% Task 1: Initialize a and b Coefficients for lsim of bands
