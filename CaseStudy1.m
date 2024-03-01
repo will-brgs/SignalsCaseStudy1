@@ -66,7 +66,32 @@ a_Hi(:,1) = 1;
 a_Hi(:,2) = 1./(C.*R_Lo);
 b_Hi = zeros(5, 1);
 b_Hi(:,1) = 1;
+
+%% Import Chirp
+
+fs = 44.1e3; % sampling frequency
+dT = 1/fs; % sampling period
+t = 0:dT:3; % time vector
+fmin = 1; fmax = 23e3; % 10000; % min and max frequencies for chirp
+fchirp = (fmax-fmin).*t/max(t)+fmin; % chirp instantaneous frequency
+xchirp = cos(2*pi*fchirp/2.*t); % chirp signal
+% xchirp = chirp(t,fmin,max(t),fmax,'logarithmic'); % use of Matlab chirp with logarithmic frequency variation
+% sound(xchirp,fs)
+ychirpHPF = filter(.5*[1 -1],1,xchirp);
+ychirpMA = filter(ones(2,1),1,xchirp);
+% visualization - log-frequency linear-amplitude
+figure, subplot(3,1,1), plot(fchirp,xchirp); title('Chirp input')
+subplot(3,1,2), plot(fchirp,(ychirpMA)); title('DT Moving Average')
+subplot(3,1,3), plot(fchirp,(ychirpHPF)); title('DT Highpass Filter'), xlabel('Frequency (Hz)')
+% to visualize with log or linear scale for frequency or amplitude, use this code accordingly
+for i = 1:3, subplot(3,1,i), set(gca,'XScale','log'), set(gca,'YScale','linear'), axis tight, end
 %% Task 1: 
+output = xchirp;
+for i = 1:5
+output = lsim(b_Lo(i,:),a_Lo(i,:), output,fchirp);
+output = lsim(b_Hi(i,:),a_Hi(i,:), output,fchirp);
+end
+figure, plot(output)
 %% Read All Audio Files
 
 %Import Blue in Green with Siren
