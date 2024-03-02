@@ -10,7 +10,7 @@ clear
 Fs = 44.1e3; %44.1 kHz Audio Sampling Frequency
 
 disp("leela says hi");
-
+disp('Will says hi')
 %% Task 1: Design Variable Amplification for 5 Band Frequencies
 % Here we will construct the set of linear systems
 %% Task 1: Initialize R and C values for desired cutoff frequencies
@@ -57,19 +57,11 @@ b_Hi = zeros(5, 2);
 b_Hi(:,1) = 1;
 
 clear C;
-%% Import Chirp Function
-% Sample code from Hw2 to generate chirp between given frequencies
-dT = 1/Fs; % sampling period
-t = 0:dT:3; % time vector
-fmin = 1; fmax = 23e3; % 10000; % min and max frequencies for chirp
-chirp_f = (fmax-fmin).*t/max(t)+fmin; % chirp instantaneous frequency
-chirp_x = cos(2*pi*chirp_f/2.*t); % chirp signal
 
-clear dT, clear t,clear fmin, clear fmax, 
-%% Bode Plot Test
+%% Bode Plot Test: Independent Bandpass Filters
 % Generate Bode magnitude plots for all 5 bandpass filters
 bode_size = 200; % How many differnt frequencies we want to test
-bode_freq = logspace(1, 5, bode_size); %Generate different frequency vals
+bode_freq = logspace(1, 4.25, bode_size); %Generate different frequency vals, 10^4.25 max yeilds close to limit for human hearing
 t = 0:1/Fs:1; %Sample timepoint vector
 
 H = zeros(bode_size,1);
@@ -93,6 +85,7 @@ H_mag = 20 * log(abs(H)); % Convert output H to dB magnitude
 
 subplot(3,2,j)
 semilogx(bode_freq, H_mag, 'linewidth', 1.5)
+xlim([bode_freq(1),bode_freq(end)])
 xlabel('Frequency (Hz)');
 ylabel('Output (dB)');
 xline(center_band(j), "-");
@@ -101,50 +94,50 @@ xline(cutoffs(j,2), "--"); % Upper frequency Cutoff
 title("Bode Plot Magnitude",num2str(center_band(j)) + " Hz Center")
 end
 clear cutoff_Hi, clear cutoff_Lo, clear x_filter, clear i, clear j, clear x
-clear H,
-%% Bode Plot Test 2
-bode_range_2 = logspace(1, 5, 200);
-t = 0:1/Fs:1;
+clear H, clear H_mag,
+%% Bode Plot Test 2: Combined Equalizer
+% t, bode_freq, are resued from revious bode plots
 
-xSum_2 = zeros(length(132301), 1);
-for i = 1:length(bode_range_2)
-    freq_current_2 = bode_range_2(i);
-    x_2 = exp(1j*2*pi*freq_current_2*t);
+H = zeros(bode_size,1);
+x_sum = zeros(length(t), 1);
+
+for i = 1:length(bode_freq)
+    freq_current = bode_freq(i);
+    x = exp(1j* 2*pi * freq_current * t);
     
     for j = 1:5
-        x_filter_2 = lsim(b_Lo(j,:),a_Lo(j, :), x_2, t);
-        x_filter_2 = lsim(b_Hi(j,:),a_Hi(j,:), x_filter_2, t);
-        xSum_2 = xSum_2 + x_filter_2;
+        x_out = lsim(b_Lo(j,:),a_Lo(j, :), x, t);
+        x_out = lsim(b_Hi(j,:),a_Hi(j,:), x_out, t);
+        x_sum = x_sum + x_out;
     end
-
-    H_w_band_2(i) = xSum_2(end)/x_2(end);
+    H(i) = x_sum(end)/x(end);
 end
 
 %Calculate magnitude and angle values of complex gain
-mag_band_2 = 20*log10(H_w_band_2);
-angle_band_2 = angle((H_w_band_2)/pi);
+H_mag = 20 * log(abs(H));
 
 figure, hold on
-subplot(2,1,1)
-semilogx(bode_range_2, mag_band_2)
-% xline(cutoffs(1), "--", num2str(cutoffs(1)) + " Hz");
-% xline(cutoffs(2), "--", num2str(cutoffs(2)) + " Hz");
-% xline(cutoffs(3), "--", num2str(cutoffs(3)) + " Hz");
-% xline(cutoffs(4), "--", num2str(cutoffs(4)) + " Hz");
-% xline(cutoffs(5), "--", num2str(cutoffs(5)) + " Hz");
-xline(60, "--", num2str(60) + " Hz");
-xline(230, "--", num2str(230) + " Hz");
-xline(910, "--", num2str(910) + " Hz");
-xline(3000, "--", num2str(3000) + " Hz");
-xline(14000, "--", num2str(14000) + " Hz");
+semilogx(bode_freq, H_mag, 'linewidth', 1.5)
+xlim([bode_freq(1),bode_freq(end)])
 title("High-pass Magnitude")
-
-subplot(2,1,2)
-semilogx(bode_range_2, angle_band_2)
-title("High-pass Angle")
-sgtitle('Bode plot 2')
+for i = 1:5
+    for j = 1:2
+        xline(cutoffs(i,j), "--"); % Create cutoff lines for each center
+    end
+        xline(center_band(1,i), "-"); % Create centerlines
+end
 hold off
+clear x, clear t, clear x_out, clear x_sum, clear H, clear H_mag
+clear i, clear j, clear bode_size, clear bode_freq
+%% Import Chirp Function
+% Sample code from Hw2 to generate chirp between given frequencies
+dT = 1/Fs; % sampling period
+t = 0:dT:3; % time vector
+fmin = 1; fmax = 23e3; % 10000; % min and max frequencies for chirp
+chirp_f = (fmax-fmin).*t/max(t)+fmin; % chirp instantaneous frequency
+chirp_x = cos(2*pi*chirp_f/2.*t); % chirp signal
 
+clear dT, clear t,clear fmin, clear fmax, 
 %% 
 output = chirp_x;
 outputSum = zeros(length(chirp_f), 1);
