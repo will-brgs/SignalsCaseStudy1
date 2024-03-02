@@ -116,6 +116,7 @@ angle_band = angle((H_w_band)/pi);
 figure, hold on
 subplot(2,1,1)
 semilogx(bode_range, mag_band)
+xline(910, "--", num2str(910) + " Hz");
 title("High-pass Magnitude")
 
 subplot(2,1,2)
