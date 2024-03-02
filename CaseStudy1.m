@@ -19,7 +19,7 @@ R_Lo = zeros(5,1);
 R_Hi = zeros(5,1);
 cutoffs = zeros(5, 1);
 
-k_cut = 0.5;
+k_cut = 0.1;
 
 % Band 1: 60Hz
 cutoff_Hi = 60-(k_cut*60);
@@ -113,7 +113,7 @@ end
 mag_band = 20*log10(H_w_band);
 angle_band = angle((H_w_band)/pi);
 
-hold on
+figure, hold on
 subplot(2,1,1)
 semilogx(bode_range, mag_band)
 title("High-pass Magnitude")
@@ -121,7 +121,8 @@ title("High-pass Magnitude")
 subplot(2,1,2)
 semilogx(bode_range, angle_band)
 title("High-pass Angle")
-
+sgtitle('Bode plot 1')
+hold off
 %% Bode Plot Test 2
 bode_range_2 = logspace(1, 5, 200);
 sample_times = 0:1/Fs:3;
@@ -141,22 +142,29 @@ for i = 1:length(bode_range_2)
 end
 
 %Calculate magnitude and angle values of complex gain
-mag_band_2 = 20*log10(H_w_band);
-angle_band_2 = angle((H_w_band)/pi);
+mag_band_2 = 20*log10(H_w_band_2);
+angle_band_2 = angle((H_w_band_2)/pi);
 
-hold on
+figure, hold on
 subplot(2,1,1)
 semilogx(bode_range_2, mag_band_2)
-xline(cutoffs(1), "--", num2str(cutoffs(1)) + " Hz");
-xline(cutoffs(2), "--", num2str(cutoffs(2)) + " Hz");
-xline(cutoffs(3), "--", num2str(cutoffs(3)) + " Hz");
-xline(cutoffs(4), "--", num2str(cutoffs(4)) + " Hz");
-xline(cutoffs(5), "--", num2str(cutoffs(5)) + " Hz");
+% xline(cutoffs(1), "--", num2str(cutoffs(1)) + " Hz");
+% xline(cutoffs(2), "--", num2str(cutoffs(2)) + " Hz");
+% xline(cutoffs(3), "--", num2str(cutoffs(3)) + " Hz");
+% xline(cutoffs(4), "--", num2str(cutoffs(4)) + " Hz");
+% xline(cutoffs(5), "--", num2str(cutoffs(5)) + " Hz");
+xline(60, "--", num2str(60) + " Hz");
+xline(230, "--", num2str(230) + " Hz");
+xline(910, "--", num2str(910) + " Hz");
+xline(3000, "--", num2str(3000) + " Hz");
+xline(14000, "--", num2str(14000) + " Hz");
 title("High-pass Magnitude")
 
 subplot(2,1,2)
 semilogx(bode_range_2, angle_band_2)
 title("High-pass Angle")
+sgtitle('Bode plot 2')
+hold off
 
 %% 
 output = xchirp;
