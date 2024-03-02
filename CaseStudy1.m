@@ -86,25 +86,16 @@ subplot(3,1,3), plot(fchirp,(ychirpHPF)); title('DT Highpass Filter'), xlabel('F
 % to visualize with log or linear scale for frequency or amplitude, use this code accordingly
 for i = 1:3, subplot(3,1,i), set(gca,'XScale','log'), set(gca,'YScale','linear'), axis tight, end
 %% Bode Plot Test
-% output = xchirp;
 bode_range = logspace(1, 5);
-outputSum = zeros(length(fchirp), 1);
 sample_times = 0:1/Fs:3;
-% for i = 1
-% output_filter = lsim(b_Lo(i,:),a_Lo(i,:), output,fchirp);
-% output_filter = lsim(b_Hi(i,:),a_Hi(i,:), output_filter,fchirp);
-% outputSum = outputSum + output_filter;
-% end
+
 
 for i = 1:length(bode_range)
     freq_current = bode_range(i);
     x = exp(1j*freq_current*sample_times);
 
-
     x_filter = lsim(b_Lo(3,:),a_Lo(3,:), x, sample_times);
     x_filter = lsim(b_Hi(3,:),a_Hi(3,:), x_filter, sample_times);
-    % output_low = lsim(b_low, a_low, x, sample_period);
-    % output_high = lsim(b_high, a_high, x, sample_period);
 
     H_w_band(i) = x_filter(end)/x(end);
 end
@@ -121,6 +112,55 @@ title("High-pass Magnitude")
 subplot(2,1,2)
 semilogx(bode_range, angle_band)
 title("High-pass Angle")
+
+%% Bode Plot Test 2
+bode_range = logspace(1, 5, 200);
+sample_times = 0:1/Fs:3;
+
+xSum = zeros(length(132301), 1);
+for i = 1:length(bode_range)
+    freq_current = bode_range(i);
+    x = exp(1j*freq_current*sample_times);
+    
+    for j = 1:5
+    x_filter = lsim(b_Lo(j,:),a_Lo(j, :), x, sample_times);
+    x_filter = lsim(b_Hi(j,:),a_Hi(j,:), x_filter, sample_times);
+    xSum = xSum + x_filter;
+    end
+
+    H_w_band(i) = xSum(end)/x(end);
+end
+
+%Calculate magnitude and angle values of complex gain
+mag_band = 20*log10(H_w_band);
+angle_band = angle((H_w_band)/pi);
+
+hold on
+subplot(2,1,1)
+semilogx(bode_range, mag_band)
+title("High-pass Magnitude")
+
+subplot(2,1,2)
+semilogx(bode_range, angle_band)
+title("High-pass Angle")
+
+%% 
+output = xchirp;
+outputSum = zeros(length(fchirp), 1);
+
+for i = 5:5
+    output_filter = lsim(b_Lo(i,:),a_Lo(i, :), output, fchirp);
+    output_filter = lsim(b_Hi(i,:),a_Hi(i,:), output_filter, fchirp);
+    outputSum = outputSum + output_filter;
+end
+
+figure, plot(outputSum);
+xscale log;
+% for i = 1
+% output_filter = lsim(b_Lo(i,:),a_Lo(i,:), output,fchirp);
+% output_filter = lsim(b_Hi(i,:),a_Hi(i,:), output_filter,fchirp);
+% outputSum = outputSum + output_filter;
+% end
 
 %% Read All Audio Files
 
