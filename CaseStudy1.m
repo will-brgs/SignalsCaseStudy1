@@ -17,8 +17,10 @@ C = 10e-6; % Consider resistance will be constant at 10uF, R will change to alte
 % Create a vector of R values for Lo and Hi respectively
 R_Lo = zeros(5,1);
 R_Hi = zeros(5,1);
+cutoffs = zeros(5, 1);
 % Band 1: 60Hz
 cutoff_Hi = 1;
+cutoffs(1) = cutoff_Hi;
 R_Hi(1) = 1/(2*pi*C*cutoff_Hi);
 
 cutoff_Lo = 119;
@@ -26,6 +28,7 @@ R_Lo(1) = 1/(2*pi*C*cutoff_Lo);
 
 %Band 2: 230Hz
 cutoff_Hi = 119;
+cutoffs(2) = cutoff_Hi;
 R_Hi(2) = 1/(2*pi*C*cutoff_Hi);
 
 cutoff_Lo = 341;
@@ -33,6 +36,7 @@ R_Lo(2) = 1/(2*pi*C*cutoff_Lo);
 
 %Band 3: 910Hz
 cutoff_Hi = 341;
+cutoffs(3) = cutoff_Hi;
 R_Hi(3) = 1/(2*pi*C*cutoff_Hi);
 
 cutoff_Lo = 1479;
@@ -40,6 +44,7 @@ R_Lo(3) = 1/(2*pi*C*cutoff_Lo);
 
 %Band 4: 3kHz
 cutoff_Hi = 1479;
+cutoffs(4) = cutoff_Hi;
 R_Hi(4) = 1/(2*pi*C*cutoff_Hi);
 
 cutoff_Lo = 4521;
@@ -47,6 +52,7 @@ R_Lo(4) = 1/(2*pi*C*cutoff_Lo);
 
 %band 5: 14kHz
 cutoff_Hi = 4521;
+cutoffs(5) = cutoff_Hi;
 R_Hi(5) = 1/(2*pi*C*cutoff_Hi);
 
 cutoff_Lo = 23479;
@@ -123,9 +129,9 @@ for i = 1:length(bode_range)
     x = exp(1j*freq_current*sample_times);
     
     for j = 1:5
-    x_filter = lsim(b_Lo(j,:),a_Lo(j, :), x, sample_times);
-    x_filter = lsim(b_Hi(j,:),a_Hi(j,:), x_filter, sample_times);
-    xSum = xSum + x_filter;
+        x_filter = lsim(b_Lo(j,:),a_Lo(j, :), x, sample_times);
+        x_filter = lsim(b_Hi(j,:),a_Hi(j,:), x_filter, sample_times);
+        xSum = xSum + x_filter;
     end
 
     H_w_band(i) = xSum(end)/x(end);
@@ -138,6 +144,11 @@ angle_band = angle((H_w_band)/pi);
 hold on
 subplot(2,1,1)
 semilogx(bode_range, mag_band)
+xline(cutoffs(1), "--", num2str(cutoffs(1)) + " Hz");
+xline(cutoffs(2), "--", num2str(cutoffs(2)) + " Hz");
+xline(cutoffs(3), "--", num2str(cutoffs(3)) + " Hz");
+xline(cutoffs(4), "--", num2str(cutoffs(4)) + " Hz");
+xline(cutoffs(5), "--", num2str(cutoffs(5)) + " Hz");
 title("High-pass Magnitude")
 
 subplot(2,1,2)
