@@ -93,8 +93,7 @@ xline(cutoffs(j,1), "--"); % Lower Frequency Cutoff
 xline(cutoffs(j,2), "--"); % Upper frequency Cutoff
 title("Bode Plot Magnitude",num2str(center_band(j)) + " Hz Center")
 end
-clear cutoff_Hi, clear cutoff_Lo, clear x_filter, clear i, clear j, clear x
-clear H, clear H_mag,
+clear x_filter, clear i, clear j, clear x, clear H, clear H_mag,
 %% Bode Plot Test 2: Combined Equalizer
 % t, bode_freq, are resued from revious bode plots
 
@@ -117,9 +116,12 @@ end
 H_mag = 20 * log(abs(H));
 
 figure, hold on
-semilogx(bode_freq, H_mag, 'linewidth', 1.5)
+plot(bode_freq, H_mag, 'linewidth', 1.5) % For some reason semilogx doesnt work here
+set(gca, 'XScale', 'log');
+xlabel('Frequency (Hz)');
+ylabel('Output (dB)');
 xlim([bode_freq(1),bode_freq(end)])
-title("High-pass Magnitude")
+title("Merged Bandpass Equalizer Output")
 for i = 1:5
     for j = 1:2
         xline(cutoffs(i,j), "--"); % Create cutoff lines for each center
@@ -128,7 +130,7 @@ for i = 1:5
 end
 hold off
 clear x, clear t, clear x_out, clear x_sum, clear H, clear H_mag
-clear i, clear j, clear bode_size, clear bode_freq
+clear i, clear j
 %% Import Chirp Function
 % Sample code from Hw2 to generate chirp between given frequencies
 dT = 1/Fs; % sampling period
@@ -138,18 +140,18 @@ chirp_f = (fmax-fmin).*t/max(t)+fmin; % chirp instantaneous frequency
 chirp_x = cos(2*pi*chirp_f/2.*t); % chirp signal
 
 clear dT, clear t,clear fmin, clear fmax, 
-%% 
-output = chirp_x;
-outputSum = zeros(length(chirp_f), 1);
-
-for i = 5:5
-    output_filter = lsim(b_Lo(i,:),a_Lo(i, :), output, chirp_f);
-    output_filter = lsim(b_Hi(i,:),a_Hi(i,:), output_filter, chirp_f);
-    outputSum = outputSum + output_filter;
-end
-
-figure, plot(outputSum);
-xscale log;
+%% what is happening
+% output = chirp_x;
+% outputSum = zeros(length(chirp_f), 1);
+% 
+% for i = 5:5
+%     output_filter = lsim(b_Lo(i,:),a_Lo(i, :), output, chirp_f);
+%     output_filter = lsim(b_Hi(i,:),a_Hi(i,:), output_filter, chirp_f);
+%     outputSum = outputSum + output_filter;
+% end
+% 
+% figure, plot(outputSum);
+% xscale log;
 % for i = 1
 % output_filter = lsim(b_Lo(i,:),a_Lo(i,:), output,fchirp);
 % output_filter = lsim(b_Hi(i,:),a_Hi(i,:), output_filter,fchirp);
