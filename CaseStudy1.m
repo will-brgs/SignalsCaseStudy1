@@ -6,6 +6,7 @@
 % * With contributions from:  
 %% Initialization
 close all
+clear
 Fs = 44.1e3; %44.1 kHz Audio Sampling Frequency
 
 disp("leela says hi");
@@ -17,125 +18,102 @@ C = 10e-6; % Consider resistance will be constant at 10uF, R will change to alte
 % Create a vector of R values for Lo and Hi respectively
 R_Lo = zeros(5,1);
 R_Hi = zeros(5,1);
-cutoffs = zeros(5, 1);
 
-k_cut = 0.1;
+center_band = [60, 230, 910, 3e3, 14e3]; % 5 band frequency centerpoints
+cutoffs = zeros(length(center_band),2); % 1st column lo, 2nd hi
 
-% Band 1: 60Hz
-cutoff_Hi = 60-(k_cut*60);
-cutoffs(1) = cutoff_Hi;
-R_Hi(1) = 1/(2*pi*C*cutoff_Hi);
 
-cutoff_Lo = 60+(k_cut*60);
-R_Lo(1) = 1/(2*pi*C*cutoff_Lo);
+k_cut = 0.1; % Threshod of what magnitude a center frequency will extend past itself
 
-%Band 2: 230Hz
-cutoff_Hi = 230-(k_cut*230);
-cutoffs(2) = cutoff_Hi;
-R_Hi(2) = 1/(2*pi*C*cutoff_Hi);
+%% R value Allocaton
+for i = 1:5 % Calculate and allocate A and B values for Hi and Lo Coefficients
 
-cutoff_Lo = 230+(k_cut*230);
-R_Lo(2) = 1/(2*pi*C*cutoff_Lo);
+% Calc Hipass R
+cutoff_Hi = center_band(i) - (k_cut * center_band(i));
+cutoffs(i,1) = cutoff_Hi;
+R_Hi(i) = 1/(2 * pi * C * cutoff_Hi);
 
-%Band 3: 910Hz
-cutoff_Hi = 910-(k_cut*910);
-cutoffs(3) = cutoff_Hi;
-R_Hi(3) = 1/(2*pi*C*cutoff_Hi);
+% Calc Lopass R
+cutoff_Lo = center_band(i) + (k_cut * center_band(i));
+cutoffs(i,2) = cutoff_Lo;
+R_Lo(i) = 1/(2 * pi * C * cutoff_Lo);
 
-cutoff_Lo = 910+(k_cut*910);
-R_Lo(3) = 1/(2*pi*C*cutoff_Lo);
-
-%Band 4: 3kHz
-cutoff_Hi = 3000-(k_cut*3000);
-cutoffs(4) = cutoff_Hi;
-R_Hi(4) = 1/(2*pi*C*cutoff_Hi);
-
-cutoff_Lo = 3000+(k_cut*3000);
-R_Lo(4) = 1/(2*pi*C*cutoff_Lo);
-
-%band 5: 14kHz
-cutoff_Hi = 14000-(k_cut*14000);
-cutoffs(5) = cutoff_Hi;
-R_Hi(5) = 1/(2*pi*C*cutoff_Hi);
-
-cutoff_Lo = 14000+(k_cut*14000);
-R_Lo(5) = 1/(2*pi*C*cutoff_Lo);
-
-%% Task 1: Initialize a and b Coefficients for lsim of bands
-
+end
+clear i, clear k_cut; clear cutoff_Hi, clear cutoff_Lo
+%% Lsim Coefficient Allocation
 %Lowpass Filter Coefficients
 a_Lo = zeros(5, 2);
 a_Lo(:,1) = 1;
 a_Lo(:,2) = 1./(C.*R_Lo);
+
 b_Lo = 1./(C.*R_Lo);
 
 %HighPass Filter Coefficients
 a_Hi = zeros(5, 1);
 a_Hi(:,1) = 1;
 a_Hi(:,2) = 1./(C.*R_Hi);
+
 b_Hi = zeros(5, 2);
 b_Hi(:,1) = 1;
 
-%% Import Chirp
-
-fs = 44.1e3; % sampling frequency
-dT = 1/fs; % sampling period
+clear C;
+%% Import Chirp Function
+% Sample code from Hw2 to generate chirp between given frequencies
+dT = 1/Fs; % sampling period
 t = 0:dT:3; % time vector
 fmin = 1; fmax = 23e3; % 10000; % min and max frequencies for chirp
-fchirp = (fmax-fmin).*t/max(t)+fmin; % chirp instantaneous frequency
-xchirp = cos(2*pi*fchirp/2.*t); % chirp signal
-% xchirp = chirp(t,fmin,max(t),fmax,'logarithmic'); % use of Matlab chirp with logarithmic frequency variation
-% sound(xchirp,fs)
-ychirpHPF = filter(.5*[1 -1],1,xchirp);
-ychirpMA = filter(ones(2,1),1,xchirp);
-% visualization - log-frequency linear-amplitude
-figure, subplot(3,1,1), plot(fchirp,xchirp); title('Chirp input')
-subplot(3,1,2), plot(fchirp,(ychirpMA)); title('DT Moving Average')
-subplot(3,1,3), plot(fchirp,(ychirpHPF)); title('DT Highpass Filter'), xlabel('Frequency (Hz)')
-% to visualize with log or linear scale for frequency or amplitude, use this code accordingly
-for i = 1:3, subplot(3,1,i), set(gca,'XScale','log'), set(gca,'YScale','linear'), axis tight, end
+chirp_f = (fmax-fmin).*t/max(t)+fmin; % chirp instantaneous frequency
+chirp_x = cos(2*pi*chirp_f/2.*t); % chirp signal
+
+clear dT, clear t,clear fmin, clear fmax, 
 %% Bode Plot Test
-bode_range = logspace(1, 5);
-sample_times = 0:1/Fs:1;
+% Generate Bode magnitude plots for all 5 bandpass filters
+bode_size = 200; % How many differnt frequencies we want to test
+bode_freq = logspace(1, 5, bode_size); %Generate different frequency vals
+t = 0:1/Fs:1; %Sample timepoint vector
 
+H = zeros(bode_size,1);
 
-for i = 1:length(bode_range)
-    freq_current = bode_range(i);
-    x = exp(1j*2*pi*freq_current*sample_times);
+figure, hold on
+sgtitle('Bode Plot Outputs for 5 Bandpass Filters')
+for j = 1:length(center_band)
+for i = 1:length(bode_freq) % Generate bode plot
+    freq_current = 2*pi * bode_freq(i); %Convert logspace freq to angular
+    x = exp(1j * freq_current * t);
 
-    x_filter = lsim(b_Lo(3,:),a_Lo(3,:), x, sample_times);
-    x_filter = lsim(b_Hi(3,:),a_Hi(3,:), x_filter, sample_times);
+    % Pass through Both hi and lowpass filters to create bandpass
+    x_filter = lsim(b_Lo(j,:),a_Lo(j,:), x, t);
+    x_filter = lsim(b_Hi(j,:),a_Hi(j,:), x_filter, t);
 
-    H_w_band(i) = x_filter(end)/x(end);
+    H(i) = x_filter(end)/x(end);
 end
 
 %Calculate magnitude and angle values of complex gain
-mag_band = 20*log10(H_w_band);
-angle_band = angle((H_w_band)/pi);
+H_mag = 20 * log(abs(H)); % Convert output H to dB magnitude
 
-figure, hold on
-subplot(2,1,1)
-semilogx(bode_range, mag_band)
-xline(910, "--", num2str(910) + " Hz");
-title("High-pass Magnitude")
-
-subplot(2,1,2)
-semilogx(bode_range, angle_band)
-title("High-pass Angle")
-sgtitle('Bode plot 1')
-hold off
+subplot(3,2,j)
+semilogx(bode_freq, H_mag, 'linewidth', 1.5)
+xlabel('Frequency (Hz)');
+ylabel('Output (dB)');
+xline(center_band(j), "-");
+xline(cutoffs(j,1), "--"); % Lower Frequency Cutoff
+xline(cutoffs(j,2), "--"); % Upper frequency Cutoff
+title("Bode Plot Magnitude",num2str(center_band(j)) + " Hz Center")
+end
+clear cutoff_Hi, clear cutoff_Lo, clear x_filter, clear i, clear j, clear x
+clear H,
 %% Bode Plot Test 2
 bode_range_2 = logspace(1, 5, 200);
-sample_times = 0:1/Fs:1;
+t = 0:1/Fs:1;
 
 xSum_2 = zeros(length(132301), 1);
 for i = 1:length(bode_range_2)
     freq_current_2 = bode_range_2(i);
-    x_2 = exp(1j*2*pi*freq_current_2*sample_times);
+    x_2 = exp(1j*2*pi*freq_current_2*t);
     
     for j = 1:5
-        x_filter_2 = lsim(b_Lo(j,:),a_Lo(j, :), x_2, sample_times);
-        x_filter_2 = lsim(b_Hi(j,:),a_Hi(j,:), x_filter_2, sample_times);
+        x_filter_2 = lsim(b_Lo(j,:),a_Lo(j, :), x_2, t);
+        x_filter_2 = lsim(b_Hi(j,:),a_Hi(j,:), x_filter_2, t);
         xSum_2 = xSum_2 + x_filter_2;
     end
 
@@ -168,12 +146,12 @@ sgtitle('Bode plot 2')
 hold off
 
 %% 
-output = xchirp;
-outputSum = zeros(length(fchirp), 1);
+output = chirp_x;
+outputSum = zeros(length(chirp_f), 1);
 
 for i = 5:5
-    output_filter = lsim(b_Lo(i,:),a_Lo(i, :), output, fchirp);
-    output_filter = lsim(b_Hi(i,:),a_Hi(i,:), output_filter, fchirp);
+    output_filter = lsim(b_Lo(i,:),a_Lo(i, :), output, chirp_f);
+    output_filter = lsim(b_Hi(i,:),a_Hi(i,:), output_filter, chirp_f);
     outputSum = outputSum + output_filter;
 end
 
