@@ -96,12 +96,12 @@ subplot(3,1,3), plot(fchirp,(ychirpHPF)); title('DT Highpass Filter'), xlabel('F
 for i = 1:3, subplot(3,1,i), set(gca,'XScale','log'), set(gca,'YScale','linear'), axis tight, end
 %% Bode Plot Test
 bode_range = logspace(1, 5);
-sample_times = 0:1/Fs:3;
+sample_times = 0:1/Fs:1;
 
 
 for i = 1:length(bode_range)
     freq_current = bode_range(i);
-    x = exp(1j*freq_current*sample_times);
+    x = exp(1j*2*pi*freq_current*sample_times);
 
     x_filter = lsim(b_Lo(3,:),a_Lo(3,:), x, sample_times);
     x_filter = lsim(b_Hi(3,:),a_Hi(3,:), x_filter, sample_times);
@@ -126,12 +126,12 @@ sgtitle('Bode plot 1')
 hold off
 %% Bode Plot Test 2
 bode_range_2 = logspace(1, 5, 200);
-sample_times = 0:1/Fs:3;
+sample_times = 0:1/Fs:1;
 
 xSum_2 = zeros(length(132301), 1);
 for i = 1:length(bode_range_2)
     freq_current_2 = bode_range_2(i);
-    x_2 = exp(1j*freq_current_2*sample_times);
+    x_2 = exp(1j*2*pi*freq_current_2*sample_times);
     
     for j = 1:5
         x_filter_2 = lsim(b_Lo(j,:),a_Lo(j, :), x_2, sample_times);
