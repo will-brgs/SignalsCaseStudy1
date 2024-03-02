@@ -18,44 +18,47 @@ C = 10e-6; % Consider resistance will be constant at 10uF, R will change to alte
 R_Lo = zeros(5,1);
 R_Hi = zeros(5,1);
 cutoffs = zeros(5, 1);
+
+k_cut = 0.5;
+
 % Band 1: 60Hz
-cutoff_Hi = 1;
+cutoff_Hi = 60-(k_cut*60);
 cutoffs(1) = cutoff_Hi;
 R_Hi(1) = 1/(2*pi*C*cutoff_Hi);
 
-cutoff_Lo = 119;
+cutoff_Lo = 60+(k_cut*60);
 R_Lo(1) = 1/(2*pi*C*cutoff_Lo);
 
 %Band 2: 230Hz
-cutoff_Hi = 119;
+cutoff_Hi = 230-(k_cut*230);
 cutoffs(2) = cutoff_Hi;
 R_Hi(2) = 1/(2*pi*C*cutoff_Hi);
 
-cutoff_Lo = 341;
+cutoff_Lo = 230+(k_cut*230);
 R_Lo(2) = 1/(2*pi*C*cutoff_Lo);
 
 %Band 3: 910Hz
-cutoff_Hi = 341;
+cutoff_Hi = 910-(k_cut*910);
 cutoffs(3) = cutoff_Hi;
 R_Hi(3) = 1/(2*pi*C*cutoff_Hi);
 
-cutoff_Lo = 1479;
+cutoff_Lo = 910+(k_cut*910);
 R_Lo(3) = 1/(2*pi*C*cutoff_Lo);
 
 %Band 4: 3kHz
-cutoff_Hi = 1479;
+cutoff_Hi = 3000-(k_cut*3000);
 cutoffs(4) = cutoff_Hi;
 R_Hi(4) = 1/(2*pi*C*cutoff_Hi);
 
-cutoff_Lo = 4521;
+cutoff_Lo = 3000+(k_cut*3000);
 R_Lo(4) = 1/(2*pi*C*cutoff_Lo);
 
 %band 5: 14kHz
-cutoff_Hi = 4521;
+cutoff_Hi = 14000-(k_cut*14000);
 cutoffs(5) = cutoff_Hi;
 R_Hi(5) = 1/(2*pi*C*cutoff_Hi);
 
-cutoff_Lo = 23479;
+cutoff_Lo = 14000+(k_cut*14000);
 R_Lo(5) = 1/(2*pi*C*cutoff_Lo);
 
 %% Task 1: Initialize a and b Coefficients for lsim of bands
@@ -120,30 +123,30 @@ semilogx(bode_range, angle_band)
 title("High-pass Angle")
 
 %% Bode Plot Test 2
-bode_range = logspace(1, 5, 200);
+bode_range_2 = logspace(1, 5, 200);
 sample_times = 0:1/Fs:3;
 
-xSum = zeros(length(132301), 1);
-for i = 1:length(bode_range)
-    freq_current = bode_range(i);
-    x = exp(1j*freq_current*sample_times);
+xSum_2 = zeros(length(132301), 1);
+for i = 1:length(bode_range_2)
+    freq_current_2 = bode_range_2(i);
+    x_2 = exp(1j*freq_current_2*sample_times);
     
     for j = 1:5
-        x_filter = lsim(b_Lo(j,:),a_Lo(j, :), x, sample_times);
-        x_filter = lsim(b_Hi(j,:),a_Hi(j,:), x_filter, sample_times);
-        xSum = xSum + x_filter;
+        x_filter_2 = lsim(b_Lo(j,:),a_Lo(j, :), x_2, sample_times);
+        x_filter_2 = lsim(b_Hi(j,:),a_Hi(j,:), x_filter_2, sample_times);
+        xSum_2 = xSum_2 + x_filter_2;
     end
 
-    H_w_band(i) = xSum(end)/x(end);
+    H_w_band_2(i) = xSum_2(end)/x_2(end);
 end
 
 %Calculate magnitude and angle values of complex gain
-mag_band = 20*log10(H_w_band);
-angle_band = angle((H_w_band)/pi);
+mag_band_2 = 20*log10(H_w_band);
+angle_band_2 = angle((H_w_band)/pi);
 
 hold on
 subplot(2,1,1)
-semilogx(bode_range, mag_band)
+semilogx(bode_range_2, mag_band_2)
 xline(cutoffs(1), "--", num2str(cutoffs(1)) + " Hz");
 xline(cutoffs(2), "--", num2str(cutoffs(2)) + " Hz");
 xline(cutoffs(3), "--", num2str(cutoffs(3)) + " Hz");
@@ -152,7 +155,7 @@ xline(cutoffs(5), "--", num2str(cutoffs(5)) + " Hz");
 title("High-pass Magnitude")
 
 subplot(2,1,2)
-semilogx(bode_range, angle_band)
+semilogx(bode_range_2, angle_band_2)
 title("High-pass Angle")
 
 %% 
