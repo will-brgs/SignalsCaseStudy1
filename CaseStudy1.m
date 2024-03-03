@@ -98,8 +98,8 @@ clear x_filter, clear i, clear j, clear x, clear H, clear H_mag,
 % t, bode_freq, are resued from revious bode plots
 t = 0:1/Fs:1; %Sample timepoint vector
 H = zeros(bode_size,1); H_2 = zeros(bode_size,1);
-x_sum = zeros(length(t), 1); x_sum_2 = zeros(length(t), 1);
-filter_n_times = 3;
+x_sum_2 = zeros(length(t), 1);
+filter_n_times = 1;
 filter_m_times = 5;
 gains = [5 4 3 2 1];
 
@@ -108,14 +108,16 @@ for i = 1:length(bode_freq)
     x = exp(1j* 2*pi * freq_current * t);
     x_out_1 = x;
     x_out_2 = x;
+    x_sum = zeros(length(t), 1);
     
-    for j = 1:5
-        for n = 1:filter_n_times
+    for j = 1:filter_n_times
+        for n = 1:1
         x_out_1 = lsim(b_Lo(j,:),a_Lo(j, :), x_out_1, t);
         x_out_1 = lsim(b_Hi(j,:),a_Hi(j,:), x_out_1, t);
         end
-        x_sum = x_sum + gains(j) * x_out_1;
+        x_sum = x_sum + x_out_1;
     end
+    % this was for comparing different iterations of filtering
     % for k = 1:5
     %     for n = 1:filter_m_times
     %     x_out_2 = lsim(b_Lo(k,:),a_Lo(k, :), x_out_2, t);
