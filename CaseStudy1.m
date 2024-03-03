@@ -99,7 +99,7 @@ clear x_filter, clear i, clear j, clear x, clear H, clear H_mag,
 H = zeros(bode_size,1);
 filter_n_times = 1;
 %filter_m_times = 5;
-gains = [5 4 3 2 1];
+gains = [5 2 5 2 5] * 1/4;
 t = 0:1/Fs:0.25;
 
 for i = 1:length(bode_freq)
@@ -111,7 +111,7 @@ for i = 1:length(bode_freq)
         for j = 1:5
             x_out = lsim(b_Lo(j,:),a_Lo(j, :), x, t);
             x_out = lsim(b_Hi(j,:),a_Hi(j,:), x_out, t);
-            x_sum = x_sum + gains(j)*x_out;
+            x_sum = x_sum + gains(j) * x_out;
         end
         
     end
@@ -141,27 +141,27 @@ clear x, clear x_out, clear x_sum, clear H, clear H_mag
 clear i, clear j
 
 %Import Blue in Green with Siren
-[sound_BGS] = audioread('Blue in Green with Siren.wav','native');
+[sound_BGS] = audioread('Blue in Green with Siren.wav');
 sound_BGS = sound_BGS(:,1);
 
 %Import Giant Steps Bass Cut
-[sound_GSBC] = audioread('Giant Steps Bass Cut.wav','native');
+[sound_GSBC] = audioread('Giant Steps Bass Cut.wav');
 sound_GSBC = sound_GSBC(:,1);
 
 %Import piano_noisy
-[sound_PN] = audioread('piano_noisy.wav','native');
+[sound_PN] = audioread('piano_noisy.wav');
 sound_PN = sound_PN(:,1);
 
 %Import roosevelt_noisy
-[sound_RN] = audioread('roosevelt_noisy.wav','native');
+[sound_RN] = audioread('roosevelt_noisy.wav');
 sound_RN = sound_RN(:,1);
 
 %Import Space Staion - Treble Cut
-[sound_SS] = audioread('Space Station - Treble Cut.wav','native');
+[sound_SS] = audioread('Space Station - Treble Cut.wav');
 sound_SS = sound_SS(:,1);
 
 %Import violin_w_siren
-[sound_VS] = audioread('violin_w_siren.wav','native');
+[sound_VS] = audioread('violin_w_siren.wav');
 sound_VS = sound_VS(:,1);
 
 %% try with audio maybe???
@@ -187,7 +187,27 @@ hold off
 xlabel("Time (s)"); ylabel("Amplitude");
 legend("Filtered", "Original");
 
-sound(sound_GSBC_sum, Fs)
+%sound(sound_GSBC_sum, Fs)
 
+%% piano
+Fs = 44100;
 
+sound_PN_time = linspace(0, length(sound_PN)/Fs, length(sound_PN));
+sound_PN_sum = zeros(length(sound_PN), 1);
+gains = [1 0.5 0 0 0];
 
+for j = 1:5
+    sound_PN_out = lsim(b_Lo(j,:),a_Lo(j, :), sound_PN, sound_PN_time);
+    sound_PN_out = lsim(b_Hi(j,:),a_Hi(j,:), sound_PN_out, sound_PN_time);
+    sound_PN_sum = sound_PN_sum + gains(j) * sound_PN_out;
+end
+
+figure();
+hold on
+plot(sound_PN_time, sound_PN_sum);
+plot(sound_PN_time, sound_PN);
+hold off
+xlabel("Time (s)"); ylabel("Amplitude");
+legend("Filtered", "Original");
+
+sound(cast(sound_PN_sum, "double"), Fs);
