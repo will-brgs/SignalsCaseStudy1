@@ -11,6 +11,7 @@ Fs = 44.1e3; %44.1 kHz Audio Sampling Frequency
 
 disp("leela says hi");
 disp('Will says hi')
+disp('hi will!!!!')
 %% Task 1: Design Variable Amplification for 5 Band Frequencies
 % Here we will construct the set of linear systems
 %% Task 1: Initialize R and C values for desired cutoff frequencies
@@ -21,7 +22,6 @@ R_Hi = zeros(5,1);
 
 center_band = [60, 230, 910, 3e3, 14e3]; % 5 band frequency centerpoints
 cutoffs = zeros(length(center_band),2); % 1st column lo, 2nd hi
-
 
 k_cut = 0.1; % Threshod of what magnitude a center frequency will extend past itself
 
@@ -96,32 +96,50 @@ end
 clear x_filter, clear i, clear j, clear x, clear H, clear H_mag,
 %% Bode Plot Test 2: Combined Equalizer
 % t, bode_freq, are resued from revious bode plots
-
-H = zeros(bode_size,1);
-x_sum = zeros(length(t), 1);
+t = 0:1/Fs:1; %Sample timepoint vector
+H = zeros(bode_size,1); H_2 = zeros(bode_size,1);
+x_sum = zeros(length(t), 1); x_sum_2 = zeros(length(t), 1);
+filter_n_times = 3;
+filter_m_times = 5;
+gains = [5 4 3 2 1];
 
 for i = 1:length(bode_freq)
     freq_current = bode_freq(i);
     x = exp(1j* 2*pi * freq_current * t);
+    x_out_1 = x;
+    x_out_2 = x;
     
     for j = 1:5
-        x_out = lsim(b_Lo(j,:),a_Lo(j, :), x, t);
-        x_out = lsim(b_Hi(j,:),a_Hi(j,:), x_out, t);
-        x_sum = x_sum + x_out;
+        for n = 1:filter_n_times
+        x_out_1 = lsim(b_Lo(j,:),a_Lo(j, :), x_out_1, t);
+        x_out_1 = lsim(b_Hi(j,:),a_Hi(j,:), x_out_1, t);
+        end
+        x_sum = x_sum + gains(j) * x_out_1;
     end
+    % for k = 1:5
+    %     for n = 1:filter_m_times
+    %     x_out_2 = lsim(b_Lo(k,:),a_Lo(k, :), x_out_2, t);
+    %     x_out_2 = lsim(b_Hi(k,:),a_Hi(k,:), x_out_2, t);
+    %     end
+    %     x_sum_2 = x_sum_2 + gains(k) * x_out_2;
+    % end
     H(i) = x_sum(end)/x(end);
+    %H_2(i) = x_sum_2(end)/x(end);
 end
 
 %Calculate magnitude and angle values of complex gain
 H_mag = 20 * log(abs(H));
+H_mag_2 = 20 * log(abs(H_2));
 
 figure, hold on
 plot(bode_freq, H_mag, 'linewidth', 1.5) % For some reason semilogx doesnt work here
+plot(bode_freq, H_mag_2, 'linewidth', 1.5)
 set(gca, 'XScale', 'log');
 xlabel('Frequency (Hz)');
 ylabel('Output (dB)');
 xlim([bode_freq(1),bode_freq(end)])
-title("Merged Bandpass Equalizer Output")
+title("Merged Bandpass Equalizer Output"); 
+legend(num2str(filter_n_times) + " times", num2str(filter_m_times) + " times");
 for i = 1:5
     for j = 1:2
         xline(cutoffs(i,j), "--"); % Create cutoff lines for each center
@@ -142,16 +160,19 @@ chirp_x = cos(2*pi*chirp_f/2.*t); % chirp signal
 clear dT, clear t,clear fmin, clear fmax, 
 %% what is happening
 % output = chirp_x;
-% outputSum = zeros(length(chirp_f), 1);
+% chirp_sum = zeros(length(chirp_f), 1);
 % 
-% for i = 5:5
-%     output_filter = lsim(b_Lo(i,:),a_Lo(i, :), output, chirp_f);
-%     output_filter = lsim(b_Hi(i,:),a_Hi(i,:), output_filter, chirp_f);
-%     outputSum = outputSum + output_filter;
+% for i = 1:1
+%     chirp_filter = lsim(b_Lo(i,:),a_Lo(i, :), output, chirp_f);
+%     chirp_filter = lsim(b_Hi(i,:),a_Hi(i,:), chirp_filter, chirp_f);
+%     chirp_sum = chirp_sum + chirp_filter;
 % end
-% 
-% figure, plot(outputSum);
-% xscale log;
+% % 
+% figure, 
+% hold on
+% plot(chirp_sum);
+% plot(chirp_x);
+% sound([chirp_x, zeros(1, 1.5 * Fs), chirp_sum.'], Fs);
 % for i = 1
 % output_filter = lsim(b_Lo(i,:),a_Lo(i,:), output,fchirp);
 % output_filter = lsim(b_Hi(i,:),a_Hi(i,:), output_filter,fchirp);
@@ -183,3 +204,31 @@ sound_SS = sound_SS(:,1);
 %Import violin_w_siren
 [sound_VS] = audioread('violin_w_siren.wav','native');
 sound_VS = sound_VS(:,1);
+
+%% try with audio maybe???
+
+gains_2 = [5 4 3 1 0.5];
+filter_times = [10 5 4 3 3];
+sound_GSBC_time = linspace(0, length(sound_GSBC)/Fs, length(sound_GSBC));
+sound_GSBC_sum = zeros(length(sound_GSBC), 1);
+
+for j = 1:5
+        for n = 1:filter_times(j)
+        sound_GSBC_out = lsim(b_Lo(j,:),a_Lo(j, :), sound_GSBC, sound_GSBC_time);
+        sound_GSBC_out = lsim(b_Hi(j,:),a_Hi(j,:), sound_GSBC_out, sound_GSBC_time);
+        end
+        sound_GSBC_sum = sound_GSBC_sum + gains_2(j) * sound_GSBC_out;
+end
+
+figure();
+hold on
+plot(sound_GSBC_time, sound_GSBC_sum);
+plot(sound_GSBC_time, sound_GSBC);
+hold off
+xlabel("Time (s)"); ylabel("Amplitude");
+legend("Filtered", "Original");
+
+sound(sound_GSBC_sum, Fs)
+
+
+
