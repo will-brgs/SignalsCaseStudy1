@@ -23,7 +23,7 @@ R_Hi = zeros(5,1);
 center_band = [60, 230, 910, 3e3, 14e3]; % 5 band frequency centerpoints
 cutoffs = zeros(length(center_band),2); % 1st column lo, 2nd hi
 
-k_cut = 0.1; % Threshod of what magnitude a center frequency will extend past itself
+k_cut = 0.25; % Threshod of what magnitude a center frequency will extend past itself
 
 %% R value Allocaton
 for i = 1:5 % Calculate and allocate A and B values for Hi and Lo Coefficients
@@ -60,9 +60,9 @@ clear C;
 
 %% Bode Plot Test: Independent Bandpass Filters
 % Generate Bode magnitude plots for all 5 bandpass filters
-bode_size = 200; % How many differnt frequencies we want to test
+bode_size = 50; % How many differnt frequencies we want to test
 bode_freq = logspace(1, 4.25, bode_size); %Generate different frequency vals, 10^4.25 max yeilds close to limit for human hearing
-t = 0:1/Fs:1; %Sample timepoint vector
+t = 0:1/Fs:0.25; %Sample timepoint vector
 
 H = zeros(bode_size,1);
 
@@ -96,7 +96,6 @@ end
 clear x_filter, clear i, clear j, clear x, clear H, clear H_mag,
 %% Bode Plot Test 2: Combined Equalizer
 % t, bode_freq, are resued from revious bode plots
-t = 0:1/Fs:1; %Sample timepoint vector
 H = zeros(bode_size,1); H_2 = zeros(bode_size,1);
 x_sum_2 = zeros(length(t), 1);
 filter_n_times = 1;
