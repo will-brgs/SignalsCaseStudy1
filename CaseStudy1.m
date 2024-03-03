@@ -109,8 +109,8 @@ for i = 1:length(bode_freq)
     x_out_2 = x;
     x_sum = zeros(length(t), 1);
     
-    for j = 1:filter_n_times
-        for n = 1:1
+    for n = 1:filter_n_times
+        for j = 1:5
         x_out_1 = lsim(b_Lo(j,:),a_Lo(j, :), x_out_1, t);
         x_out_1 = lsim(b_Hi(j,:),a_Hi(j,:), x_out_1, t);
         end
@@ -140,7 +140,7 @@ xlabel('Frequency (Hz)');
 ylabel('Output (dB)');
 xlim([bode_freq(1),bode_freq(end)])
 title("Merged Bandpass Equalizer Output"); 
-legend(num2str(filter_n_times) + " times", num2str(filter_m_times) + " times");
+%legend(num2str(filter_n_times) + " times", num2str(filter_m_times) + " times");
 for i = 1:5
     for j = 1:2
         xline(cutoffs(i,j), "--"); % Create cutoff lines for each center
@@ -148,39 +148,9 @@ for i = 1:5
         xline(center_band(1,i), "-"); % Create centerlines
 end
 hold off
-clear x, clear t, clear x_out, clear x_sum, clear H, clear H_mag
-clear i, clear j
-%% Import Chirp Function
-% Sample code from Hw2 to generate chirp between given frequencies
-dT = 1/Fs; % sampling period
-t = 0:dT:3; % time vector
-fmin = 1; fmax = 23e3; % 10000; % min and max frequencies for chirp
-chirp_f = (fmax-fmin).*t/max(t)+fmin; % chirp instantaneous frequency
-chirp_x = cos(2*pi*chirp_f/2.*t); % chirp signal
-
-clear dT, clear t,clear fmin, clear fmax, 
-%% what is happening
-% output = chirp_x;
-% chirp_sum = zeros(length(chirp_f), 1);
-% 
-% for i = 1:1
-%     chirp_filter = lsim(b_Lo(i,:),a_Lo(i, :), output, chirp_f);
-%     chirp_filter = lsim(b_Hi(i,:),a_Hi(i,:), chirp_filter, chirp_f);
-%     chirp_sum = chirp_sum + chirp_filter;
-% end
-% % 
-% figure, 
-% hold on
-% plot(chirp_sum);
-% plot(chirp_x);
-% sound([chirp_x, zeros(1, 1.5 * Fs), chirp_sum.'], Fs);
-% for i = 1
-% output_filter = lsim(b_Lo(i,:),a_Lo(i,:), output,fchirp);
-% output_filter = lsim(b_Hi(i,:),a_Hi(i,:), output_filter,fchirp);
-% outputSum = outputSum + output_filter;
-% end
-
 %% Read All Audio Files
+clear x, clear x_out, clear x_sum, clear H, clear H_mag
+clear i, clear j
 
 %Import Blue in Green with Siren
 [sound_BGS] = audioread('Blue in Green with Siren.wav','native');
