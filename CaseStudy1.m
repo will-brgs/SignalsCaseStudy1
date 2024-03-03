@@ -96,45 +96,33 @@ end
 clear x_filter, clear i, clear j, clear x, clear H, clear H_mag,
 %% Bode Plot Test 2: Combined Equalizer
 % t, bode_freq, are resued from revious bode plots
-H = zeros(bode_size,1); H_2 = zeros(bode_size,1);
-x_sum_2 = zeros(length(t), 1);
+H = zeros(bode_size,1);
 filter_n_times = 1;
-filter_m_times = 5;
+%filter_m_times = 5;
 gains = [5 4 3 2 1];
+t = 0:1/Fs:0.25;
 
 for i = 1:length(bode_freq)
     freq_current = bode_freq(i);
     x = exp(1j* 2*pi * freq_current * t);
-    x_out_1 = x;
-    x_out_2 = x;
     x_sum = zeros(length(t), 1);
     
     for n = 1:filter_n_times
         for j = 1:5
-        x_out_1 = lsim(b_Lo(j,:),a_Lo(j, :), x_out_1, t);
-        x_out_1 = lsim(b_Hi(j,:),a_Hi(j,:), x_out_1, t);
+            x_out = lsim(b_Lo(j,:),a_Lo(j, :), x, t);
+            x_out = lsim(b_Hi(j,:),a_Hi(j,:), x_out, t);
+            x_sum = x_sum + x_out;
         end
-        x_sum = x_sum + x_out_1;
+        
     end
-    % this was for comparing different iterations of filtering
-    % for k = 1:5
-    %     for n = 1:filter_m_times
-    %     x_out_2 = lsim(b_Lo(k,:),a_Lo(k, :), x_out_2, t);
-    %     x_out_2 = lsim(b_Hi(k,:),a_Hi(k,:), x_out_2, t);
-    %     end
-    %     x_sum_2 = x_sum_2 + gains(k) * x_out_2;
-    % end
     H(i) = x_sum(end)/x(end);
-    %H_2(i) = x_sum_2(end)/x(end);
 end
 
 %Calculate magnitude and angle values of complex gain
 H_mag = 20 * log(abs(H));
-H_mag_2 = 20 * log(abs(H_2));
 
 figure, hold on
 plot(bode_freq, H_mag, 'linewidth', 1.5) % For some reason semilogx doesnt work here
-plot(bode_freq, H_mag_2, 'linewidth', 1.5)
 set(gca, 'XScale', 'log');
 xlabel('Frequency (Hz)');
 ylabel('Output (dB)');
