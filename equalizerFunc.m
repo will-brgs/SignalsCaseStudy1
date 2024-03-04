@@ -1,6 +1,6 @@
-function audio_output = equalizerFunc (input, gains, center_band, k_cut)
-    Fs = 44.1e3;
-    t = 0:1/Fs:0.25; %Sample timepoint vector
+function audio_output = equalizerFunc (input, Fs, gains, center_band, k_cut)
+    t = linspace(0, length(input)/Fs, length(input)); %Sample timepoint vector
+    C = 10e-6;
 
     R_Hi = zeros(5, 1);
     R_Lo = zeros(5, 1);

@@ -156,10 +156,6 @@ sound_PN = sound_PN(:,1);
 [sound_RN] = audioread('roosevelt_noisy.wav');
 sound_RN = sound_RN(:,1);
 
-%Import Space Staion - Treble Cut
-[sound_SS] = audioread('Space Station - Treble Cut.wav');
-sound_SS = sound_SS(:,1);
-
 %Import violin_w_siren
 [sound_VS] = audioread('violin_w_siren.wav');
 sound_VS = sound_VS(:,1);
@@ -211,3 +207,16 @@ xlabel("Time (s)"); ylabel("Amplitude");
 legend("Filtered", "Original");
 
 sound(cast(sound_PN_sum, "double"), Fs);
+
+%% Space Station Using Function
+
+%Import Space Staion - Treble Cut
+[sound_SS,Fs] = audioread('Space Station - Treble Cut.wav');
+sound_SS = sound_SS(:,1);
+
+gains = [1 0.5 0 0 0];
+center_band = [60, 230, 910, 3e3, 14e3];
+k_cut = 0.2;
+piano_out = equalizerFunc(sound_SS, Fs, gains, center_band, k_cut);
+
+sound(cast(piano_out, "double"), Fs);
