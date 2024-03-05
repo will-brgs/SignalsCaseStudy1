@@ -225,7 +225,7 @@ sound(cast(out_SS, "double"), Fs_SS);
 %% Treble Boost Equalizer Bode
 % t, bode_freq, are resued from revious bode plots
 H = zeros(bode_size,1);
-gains = [1 1 0.75 3 4];
+gains_treble = [1 1 0.75 3 4];
 t = 0:1/Fs:0.25;
 
 for i = 1:length(bode_freq)
@@ -236,7 +236,7 @@ for i = 1:length(bode_freq)
     for j = 1:5
         x_out = lsim(b_Lo(j,:),a_Lo(j, :), x, t);
         x_out = lsim(b_Hi(j,:),a_Hi(j,:), x_out, t);
-        x_sum = x_sum + gains(j) * x_out;
+        x_sum = x_sum + gains_treble(j) * x_out;
     end
     H(i) = x_sum(end)/x(end);
 end
@@ -263,7 +263,7 @@ hold off
 %% Bass Boost Equalizer Bode
 % t, bode_freq, are resued from revious bode plots
 H = zeros(bode_size,1);
-gains = [4 3 0.75 1 1.5];
+gains_bass = [4 3 0.75 1 1.5];
 t = 0:1/Fs:0.25;
 
 for i = 1:length(bode_freq)
@@ -274,7 +274,7 @@ for i = 1:length(bode_freq)
     for j = 1:5
         x_out = lsim(b_Lo(j,:),a_Lo(j, :), x, t);
         x_out = lsim(b_Hi(j,:),a_Hi(j,:), x_out, t);
-        x_sum = x_sum + gains(j) * x_out;
+        x_sum = x_sum + gains_bass(j) * x_out;
     end
     H(i) = x_sum(end)/x(end);
 end
@@ -303,7 +303,7 @@ hold off
 H = zeros(bode_size,1);
 filter_n_times = 1;
 %filter_m_times = 5;
-gains = [1 1 1 1 1];
+gains_unity = [1 1 1 1 1];
 t = 0:1/Fs:0.25;
 
 for i = 1:length(bode_freq)
@@ -327,7 +327,7 @@ for i = 1:length(bode_freq)
         x_band = lsim(b_Hi(j,:),a_Hi(j,:), x_lo, t);
         end
     
-            x_sum = x_sum + gains(j)*x_band;
+            x_sum = x_sum + gains_unity(j)*x_band;
     end      
     H(i) = x_sum(end)/x(end);
 end
@@ -351,3 +351,73 @@ for i = 1:5
         xline(center_band(1,i), "-"); % Create centerlines
 end
 hold off
+
+%% Space Station : Unity
+%Import Space Staion - Treble Cut
+
+[sound_SS,Fs_SS] = audioread('Space Station - Treble Cut.wav');
+sound_SS = sound_SS(:,1);
+
+center_band = [60, 230, 910, 3e3, 14e3];
+k_cut = 0.2;
+out_SS = equalizerFunc(sound_SS, Fs_SS, gains_unity, center_band, k_cut);
+
+sound(out_SS,Fs_SS);
+%% Space Station : Treble Boost
+%Import Space Staion - Treble Cut
+
+[sound_SS,Fs_SS] = audioread('Space Station - Treble Cut.wav');
+sound_SS = sound_SS(:,1);
+
+center_band = [60, 230, 910, 3e3, 14e3];
+k_cut = 0.2;
+out_SS = equalizerFunc(sound_SS, Fs_SS, gains_treble, center_band, k_cut);
+
+sound(out_SS,Fs_SS);
+
+%% Space Station : Bass Boost
+%Import Space Staion - Treble Cut
+
+[sound_SS,Fs_SS] = audioread('Space Station - Treble Cut.wav');
+sound_SS = sound_SS(:,1);
+
+center_band = [60, 230, 910, 3e3, 14e3];
+k_cut = 0.2;
+out_SS = equalizerFunc(sound_SS, Fs_SS, gains_bass, center_band, k_cut);
+
+sound(out_SS,Fs_SS);
+
+%% Giant Steps : Unity
+
+%Import Giant Steps Bass Cut
+[sound_GSBC] = audioread('Giant Steps Bass Cut.wav');
+sound_GSBC = sound_GSBC(:,1);
+
+center_band = [60, 230, 910, 3e3, 14e3];
+k_cut = 0.2;
+sound_GSBC = equalizerFunc(sound_GSBC, Fs_SS, gains_unity, center_band, k_cut);
+
+sound(sound_GSBC,Fs_SS);
+
+%% Giant Steps : Treble Boost
+
+%Import Giant Steps Bass Cut
+[sound_GSBC] = audioread('Giant Steps Bass Cut.wav');
+sound_GSBC = sound_GSBC(:,1);
+
+center_band = [60, 230, 910, 3e3, 14e3];
+k_cut = 0.2;
+sound_GSBC = equalizerFunc(sound_GSBC, Fs_SS, gains_treble, center_band, k_cut);
+
+sound(sound_GSBC,Fs_SS);
+%% Giant Steps : Bass Boost
+
+%Import Giant Steps Bass Cut
+[sound_GSBC] = audioread('Giant Steps Bass Cut.wav');
+sound_GSBC = sound_GSBC(:,1);
+
+center_band = [60, 230, 910, 3e3, 14e3];
+k_cut = 0.2;
+sound_GSBC = equalizerFunc(sound_GSBC, Fs_SS, gains_bass, center_band, k_cut);
+
+sound(sound_GSBC,Fs_SS);
