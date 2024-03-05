@@ -59,6 +59,7 @@ b_Hi(:,1) = 1;
 
 clear C;
 
+%% Task 2: Test lsim variables by frequency response analysis
 %% Bode Plot Test: Independent Bandpass Filters
 % Generate Bode magnitude plots for all 5 bandpass filters
 bode_size = 50; % How many differnt frequencies we want to test
@@ -209,7 +210,7 @@ legend("Filtered", "Original");
 
 sound(cast(sound_PN_sum, "double"), Fs);
 
-%% Space Station Using Function
+%% Play Space Station Using Function Implementation
 
 %Import Space Staion - Treble Cut
 [sound_SS,Fs_SS] = audioread('Space Station - Treble Cut.wav');
@@ -352,23 +353,22 @@ for i = 1:5
 end
 hold off
 
-%% Space Station : Unity
-%Import Space Staion - Treble Cut
+%% Assignment 3: Pass preset fitlers through Space Station and Giant Steps
 
+%Import Space Station
 [sound_SS,Fs_SS] = audioread('Space Station - Treble Cut.wav');
 sound_SS = sound_SS(:,1);
 
+%Import giant steps
+[sound_GSBC] = audioread('Giant Steps Bass Cut.wav');
+sound_GSBC = sound_GSBC(:,1);
+%% Space Station : Unity
 center_band = [60, 230, 910, 3e3, 14e3];
 k_cut = 0.2;
 out_SS = equalizerFunc(sound_SS, Fs_SS, gains_unity, center_band, k_cut);
 
 sound(out_SS,Fs_SS);
 %% Space Station : Treble Boost
-%Import Space Staion - Treble Cut
-
-[sound_SS,Fs_SS] = audioread('Space Station - Treble Cut.wav');
-sound_SS = sound_SS(:,1);
-
 center_band = [60, 230, 910, 3e3, 14e3];
 k_cut = 0.2;
 out_SS = equalizerFunc(sound_SS, Fs_SS, gains_treble, center_band, k_cut);
@@ -376,11 +376,6 @@ out_SS = equalizerFunc(sound_SS, Fs_SS, gains_treble, center_band, k_cut);
 sound(out_SS,Fs_SS);
 
 %% Space Station : Bass Boost
-%Import Space Staion - Treble Cut
-
-[sound_SS,Fs_SS] = audioread('Space Station - Treble Cut.wav');
-sound_SS = sound_SS(:,1);
-
 center_band = [60, 230, 910, 3e3, 14e3];
 k_cut = 0.2;
 out_SS = equalizerFunc(sound_SS, Fs_SS, gains_bass, center_band, k_cut);
@@ -388,11 +383,6 @@ out_SS = equalizerFunc(sound_SS, Fs_SS, gains_bass, center_band, k_cut);
 sound(out_SS,Fs_SS);
 
 %% Giant Steps : Unity
-
-%Import Giant Steps Bass Cut
-[sound_GSBC] = audioread('Giant Steps Bass Cut.wav');
-sound_GSBC = sound_GSBC(:,1);
-
 center_band = [60, 230, 910, 3e3, 14e3];
 k_cut = 0.2;
 sound_GSBC = equalizerFunc(sound_GSBC, Fs_SS, gains_unity, center_band, k_cut);
@@ -400,24 +390,29 @@ sound_GSBC = equalizerFunc(sound_GSBC, Fs_SS, gains_unity, center_band, k_cut);
 sound(sound_GSBC,Fs_SS);
 
 %% Giant Steps : Treble Boost
-
-%Import Giant Steps Bass Cut
-[sound_GSBC] = audioread('Giant Steps Bass Cut.wav');
-sound_GSBC = sound_GSBC(:,1);
-
 center_band = [60, 230, 910, 3e3, 14e3];
 k_cut = 0.2;
 sound_GSBC = equalizerFunc(sound_GSBC, Fs_SS, gains_treble, center_band, k_cut);
 
 sound(sound_GSBC,Fs_SS);
 %% Giant Steps : Bass Boost
-
-%Import Giant Steps Bass Cut
-[sound_GSBC] = audioread('Giant Steps Bass Cut.wav');
-sound_GSBC = sound_GSBC(:,1);
-
 center_band = [60, 230, 910, 3e3, 14e3];
 k_cut = 0.2;
 sound_GSBC = equalizerFunc(sound_GSBC, Fs_SS, gains_bass, center_band, k_cut);
 
 sound(sound_GSBC,Fs_SS);
+%% Task 3: Filter out Background Noise
+
+%Import Blue in Green with Siren
+[sound_BGS, Fs_BGS] = audioread('Blue in Green with Siren.wav');
+sound_BGS = sound_BGS(:,1);
+
+%% Use a FFT To determine the frequency of background siren
+
+fft_BGS = fft(sound_BGS);
+N = length(sound_BGS);
+frequencies =  (0:N-1) * (Fs_BGS/N);
+
+figure, hold on
+semilogx(frequencies, abs(fft_BGS));
+hold off
