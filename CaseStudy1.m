@@ -12,6 +12,7 @@ Fs = 44.1e3; %44.1 kHz Audio Sampling Frequency
 disp("leela says hi");
 disp('Will says hi')
 disp('hi will!!!!')
+disp('poopoo peepee!!!')
 %% Task 1: Design Variable Amplification for 5 Band Frequencies
 % Here we will construct the set of linear systems
 %% Task 1: Initialize R and C values for desired cutoff frequencies
@@ -214,15 +215,90 @@ sound(cast(sound_PN_sum, "double"), Fs);
 [sound_SS,Fs_SS] = audioread('Space Station - Treble Cut.wav');
 sound_SS = sound_SS(:,1);
 
-gains = [1 0.5 0 0 0];
+gains = [1 1 1 3 4];
 center_band = [60, 230, 910, 3e3, 14e3];
 k_cut = 0.2;
 out_SS = equalizerFunc(sound_SS, Fs_SS, gains, center_band, k_cut);
 
 sound(cast(out_SS, "double"), Fs_SS);
 
+%% Treble Boost Equalizer
+% t, bode_freq, are resued from revious bode plots
+H = zeros(bode_size,1);
+gains = [1 1 0.75 3 4];
+t = 0:1/Fs:0.25;
 
-%% Bode Plot Test 3: Unity Equalizer
+for i = 1:length(bode_freq)
+    freq_current = bode_freq(i);
+    x = exp(1j* 2*pi * freq_current * t);
+    x_sum = zeros(length(t), 1);
+    
+    for j = 1:5
+        x_out = lsim(b_Lo(j,:),a_Lo(j, :), x, t);
+        x_out = lsim(b_Hi(j,:),a_Hi(j,:), x_out, t);
+        x_sum = x_sum + gains(j) * x_out;
+    end
+    H(i) = x_sum(end)/x(end);
+end
+
+%Calculate magnitude and angle values of complex gain
+H_mag = 20 * log(abs(H));
+
+figure, hold on
+plot(bode_freq, H_mag, 'linewidth', 1.5) % For some reason semilogx doesnt work here
+set(gca, 'XScale', 'log');
+xlabel('Frequency (Hz)');
+ylabel('Output (dB)');
+xlim([bode_freq(1),bode_freq(end)])
+title("Merged Bandpass Equalizer Output"); 
+%legend(num2str(filter_n_times) + " times", num2str(filter_m_times) + " times");
+for i = 1:5
+    for j = 1:2
+        xline(cutoffs(i,j), "--"); % Create cutoff lines for each center
+    end
+        xline(center_band(1,i), "-"); % Create centerlines
+end
+hold off
+
+%% Bass Boost Equalizer
+% t, bode_freq, are resued from revious bode plots
+H = zeros(bode_size,1);
+gains = [4 3 0.75 1 1.5];
+t = 0:1/Fs:0.25;
+
+for i = 1:length(bode_freq)
+    freq_current = bode_freq(i);
+    x = exp(1j* 2*pi * freq_current * t);
+    x_sum = zeros(length(t), 1);
+    
+    for j = 1:5
+        x_out = lsim(b_Lo(j,:),a_Lo(j, :), x, t);
+        x_out = lsim(b_Hi(j,:),a_Hi(j,:), x_out, t);
+        x_sum = x_sum + gains(j) * x_out;
+    end
+    H(i) = x_sum(end)/x(end);
+end
+
+%Calculate magnitude and angle values of complex gain
+H_mag = 20 * log(abs(H));
+
+figure, hold on
+plot(bode_freq, H_mag, 'linewidth', 1.5) % For some reason semilogx doesnt work here
+set(gca, 'XScale', 'log');
+xlabel('Frequency (Hz)');
+ylabel('Output (dB)');
+xlim([bode_freq(1),bode_freq(end)])
+title("Merged Bandpass Equalizer Output"); 
+%legend(num2str(filter_n_times) + " times", num2str(filter_m_times) + " times");
+for i = 1:5
+    for j = 1:2
+        xline(cutoffs(i,j), "--"); % Create cutoff lines for each center
+    end
+        xline(center_band(1,i), "-"); % Create centerlines
+end
+hold off
+
+%% Unity Equalizer
 % t, bode_freq, are resued from revious bode plots
 H = zeros(bode_size,1);
 filter_n_times = 1;
@@ -235,27 +311,24 @@ for i = 1:length(bode_freq)
     x = exp(1j* 2*pi * freq_current * t);
     x_sum = zeros(length(t), 1);
     
-    for n = 1:filter_n_times
-        for j = 1:5
-            if i == 1
-            %lsim low
-            x_band = lsim(b_Lo(j,:),a_Lo(j, :), x, t);
-    
-            elseif i == 5
-            %Lsim hi
-            x_band = lsim(b_Hi(j,:),a_Hi(j,:), x, t);
-    
-            else % ie i = 2:4
-            %lsim low
-            x_lo = lsim(b_Lo(j,:),a_Lo(j, :), x, t);
-            %Lsim hi
-            x_band = lsim(b_Hi(j,:),a_Hi(j,:), x_lo, t);
-            end
+    for j = 1:5
+        if i == 1
+        %lsim low
+        x_band = lsim(b_Lo(j,:),a_Lo(j, :), x, t);
+
+        elseif i == 5
+        %Lsim hi
+        x_band = lsim(b_Hi(j,:),a_Hi(j,:), x, t);
+
+        else % ie i = 2:4
+        %lsim low
+        x_lo = lsim(b_Lo(j,:),a_Lo(j, :), x, t);
+        %Lsim hi
+        x_band = lsim(b_Hi(j,:),a_Hi(j,:), x_lo, t);
+        end
     
             x_sum = x_sum + gains(j)*x_band;
-        end      
-        
-    end
+    end      
     H(i) = x_sum(end)/x(end);
 end
 
