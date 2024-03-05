@@ -211,12 +211,12 @@ sound(cast(sound_PN_sum, "double"), Fs);
 %% Space Station Using Function
 
 %Import Space Staion - Treble Cut
-[sound_SS,Fs] = audioread('Space Station - Treble Cut.wav');
+[sound_SS,Fs_SS] = audioread('Space Station - Treble Cut.wav');
 sound_SS = sound_SS(:,1);
 
 gains = [1 0.5 0 0 0];
 center_band = [60, 230, 910, 3e3, 14e3];
 k_cut = 0.2;
-piano_out = equalizerFunc(sound_SS, Fs, gains, center_band, k_cut);
+out_SS = equalizerFunc(sound_SS, Fs_SS, gains, center_band, k_cut);
 
-sound(cast(piano_out, "double"), Fs);
+sound(cast(out_SS, "double"), Fs_SS);
