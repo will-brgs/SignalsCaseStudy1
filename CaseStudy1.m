@@ -222,7 +222,7 @@ out_SS = equalizerFunc(sound_SS, Fs_SS, gains, center_band, k_cut);
 
 sound(cast(out_SS, "double"), Fs_SS);
 
-%% Treble Boost Equalizer
+%% Treble Boost Equalizer Bode
 % t, bode_freq, are resued from revious bode plots
 H = zeros(bode_size,1);
 gains = [1 1 0.75 3 4];
@@ -260,7 +260,7 @@ for i = 1:5
 end
 hold off
 
-%% Bass Boost Equalizer
+%% Bass Boost Equalizer Bode
 % t, bode_freq, are resued from revious bode plots
 H = zeros(bode_size,1);
 gains = [4 3 0.75 1 1.5];
@@ -298,7 +298,7 @@ for i = 1:5
 end
 hold off
 
-%% Unity Equalizer
+%% Unity Equalizer Bode
 % t, bode_freq, are resued from revious bode plots
 H = zeros(bode_size,1);
 filter_n_times = 1;
