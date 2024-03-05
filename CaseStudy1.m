@@ -414,5 +414,42 @@ N = length(sound_BGS);
 frequencies =  (0:N-1) * (Fs_BGS/N);
 
 figure, hold on
-semilogx(frequencies, abs(fft_BGS));
+plot(frequencies, fftshift(abs(fft_BGS)));
+title('FFT Output Magnitude of Blue in Green with Siren')
+xlabel('Frequency (Hz)')
+ylabel('Magnitude')
 hold off
+%% Use Specialized Gain Filter to Remove Siren Noise
+gains_BGS = [0.00001 ,0.001 ,0.001 ,2, 0.4];
+center_band = [60, 230, 910, 3e3, 14e3];
+k_cut = 0.2;
+out_BGS = equalizerFunc(sound_BGS, Fs_BGS, gains_BGS, center_band, k_cut);
+
+sound(out_BGS,Fs_BGS);
+% Compare filtered sound to original via FFT
+fft_BGS_out = fft(out_BGS);
+
+figure, hold on
+plot(frequencies, fftshift(abs(fft_BGS)));
+plot(frequencies, fftshift(abs(fft_BGS_out)));
+legend('Original sound', 'Output sound');
+title('FFT Output Magnitude of Blue in Green with Siren')
+xlabel('Frequency (Hz)')
+ylabel('Magnitude')
+hold off
+
+%% Task 4: Modify a Custom Sound File
+
+%% Play original sound
+[sound_Custom, Fs_Custom] = audioread('Bruh.mp4');
+sound_Custom = sound_Custom(:,1);
+
+sound(sound_Custom,Fs_Custom);
+
+%% Modify and play custom Output
+gains_Custom = [0.00001 ,0.001 ,0.001 ,2, 10000];
+center_band = [60, 230, 910, 3e3, 14e3];
+k_cut = 0.2;
+out_Custom = equalizerFunc(sound_Custom, Fs_BGS, gains_Custom, center_band, k_cut);
+
+sound(out_Custom,Fs_Custom);
