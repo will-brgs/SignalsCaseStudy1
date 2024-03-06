@@ -366,7 +366,7 @@ for i = 1:length(bode_freq)
     for j = 1:5
         x_out = lsim(b_Lo(j,:),a_Lo(j, :), x, t);
         x_out = lsim(b_Hi(j,:),a_Hi(j,:), x_out, t);
-        x_sum = x_sum + gains_treble(j) * x_out;
+        x_sum = x_sum + gains_unity(j) * x_out;
     end      
     H(i) = x_sum(end)/x(end);
 end
