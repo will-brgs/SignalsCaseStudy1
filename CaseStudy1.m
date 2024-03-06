@@ -97,7 +97,7 @@ title("Bode Plot Magnitude",num2str(center_band(j)) + " Hz Center")
 end
 clear x_filter, clear i, clear j, clear x, clear H, clear H_mag,
 %% Bode Plot Test 2: Combined Equalizer
-% t, bode_freq, are resued from revious bode plots
+% t, bode_freq, are reused from previous bode plots
 H = zeros(bode_size,1);
 gains = [1 1 1 1 1];
 t = 0:1/Fs:0.25;
@@ -126,7 +126,7 @@ font_size = 14;
 xlabel('Frequency (Hz)', 'FontSize', font_size);
 ylabel('Output (dB)', 'FontSize', font_size);
 xlim([bode_freq(1),bode_freq(end)])
-title("Merged Bandpass Equalizer Output", 'FontSize', font_size); 
+title("Merged Bandpass Equalizer Output, No Gains", 'FontSize', font_size); 
 %legend(num2str(filter_n_times) + " times", num2str(filter_m_times) + " times");
 for i = 1:5
     for j = 1:2
@@ -302,7 +302,7 @@ set(gca, 'XScale', 'log');
 xlabel('Frequency (Hz)');
 ylabel('Output (dB)');
 xlim([bode_freq(1),bode_freq(end)])
-title("Merged Bandpass Equalizer Output"); 
+title("Treble Boost Equalizer Output"); 
 %legend(num2str(filter_n_times) + " times", num2str(filter_m_times) + " times");
 for i = 1:5
     for j = 1:2
@@ -340,7 +340,7 @@ set(gca, 'XScale', 'log');
 xlabel('Frequency (Hz)');
 ylabel('Output (dB)');
 xlim([bode_freq(1),bode_freq(end)])
-title("Merged Bandpass Equalizer Output"); 
+title("Bass Boost Equalizer Output"); 
 %legend(num2str(filter_n_times) + " times", num2str(filter_m_times) + " times");
 for i = 1:5
     for j = 1:2
@@ -381,7 +381,7 @@ set(gca, 'XScale', 'log');
 xlabel('Frequency (Hz)');
 ylabel('Output (dB)');
 xlim([bode_freq(1),bode_freq(end)])
-title("Merged Bandpass Equalizer Output"); 
+title("Unity Equalizer Output"); 
 %legend(num2str(filter_n_times) + " times", num2str(filter_m_times) + " times");
 for i = 1:5
     for j = 1:2
