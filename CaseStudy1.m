@@ -99,7 +99,7 @@ clear x_filter, clear i, clear j, clear x, clear H, clear H_mag,
 %% Bode Plot Test 2: Combined Equalizer
 % t, bode_freq, are resued from revious bode plots
 H = zeros(bode_size,1);
-gains = [5 2 5 2 5] * 1/4;
+gains = [1 1 1 1 1];
 t = 0:1/Fs:0.25;
 
 for i = 1:length(bode_freq)
@@ -120,18 +120,19 @@ end
 H_mag = 20 * log(abs(H));
 
 figure, hold on
-plot(bode_freq, H_mag, 'linewidth', 1.5) % For some reason semilogx doesnt work here
+plot(bode_freq, H_mag, 'linewidth', 2.25) % For some reason semilogx doesnt work here
 set(gca, 'XScale', 'log');
-xlabel('Frequency (Hz)');
-ylabel('Output (dB)');
+font_size = 14;
+xlabel('Frequency (Hz)', 'FontSize', font_size);
+ylabel('Output (dB)', 'FontSize', font_size);
 xlim([bode_freq(1),bode_freq(end)])
-title("Merged Bandpass Equalizer Output"); 
+title("Merged Bandpass Equalizer Output", 'FontSize', font_size); 
 %legend(num2str(filter_n_times) + " times", num2str(filter_m_times) + " times");
 for i = 1:5
     for j = 1:2
-        xline(cutoffs(i,j), "--"); % Create cutoff lines for each center
+        xline(cutoffs(i,j), "--", 'LineWidth', 1.5); % Create cutoff lines for each center
     end
-        xline(center_band(1,i), "-"); % Create centerlines
+        xline(center_band(1,i), "-", 'LineWidth', 1.5); % Create centerlines
 end
 hold off
 
@@ -363,22 +364,9 @@ for i = 1:length(bode_freq)
     x_sum = zeros(length(t), 1);
     
     for j = 1:5
-        if i == 1
-        %lsim low
-        x_band = lsim(b_Lo(j,:),a_Lo(j, :), x, t);
-
-        elseif i == 5
-        %Lsim hi
-        x_band = lsim(b_Hi(j,:),a_Hi(j,:), x, t);
-
-        else % ie i = 2:4
-        %lsim low
-        x_lo = lsim(b_Lo(j,:),a_Lo(j, :), x, t);
-        %Lsim hi
-        x_band = lsim(b_Hi(j,:),a_Hi(j,:), x_lo, t);
-        end
-    
-            x_sum = x_sum + gains_unity(j)*x_band;
+        x_out = lsim(b_Lo(j,:),a_Lo(j, :), x, t);
+        x_out = lsim(b_Hi(j,:),a_Hi(j,:), x_out, t);
+        x_sum = x_sum + gains_treble(j) * x_out;
     end      
     H(i) = x_sum(end)/x(end);
 end
