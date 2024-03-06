@@ -33,8 +33,6 @@ function audio_output = equalizerFunc (input, Fs, gains, center_band, k_cut)
     audio_output = zeros(length(t), 1);
     
     for j = 1:5
-
-
         if i == 1
         %lsim low
         input_band = lsim(b_Lo(j,:),a_Lo(j, :), input, t);

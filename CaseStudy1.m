@@ -62,7 +62,7 @@ clear C;
 %% Task 2: Test lsim variables by frequency response analysis
 %% Bode Plot Test: Independent Bandpass Filters
 % Generate Bode magnitude plots for all 5 bandpass filters
-bode_size = 50; % How many differnt frequencies we want to test
+bode_size = 100; % How many differnt frequencies we want to test
 bode_freq = logspace(1, 4.25, bode_size); %Generate different frequency vals, 10^4.25 max yeilds close to limit for human hearing
 t = 0:1/Fs:0.25; %Sample timepoint vector
 
@@ -99,8 +99,6 @@ clear x_filter, clear i, clear j, clear x, clear H, clear H_mag,
 %% Bode Plot Test 2: Combined Equalizer
 % t, bode_freq, are resued from revious bode plots
 H = zeros(bode_size,1);
-filter_n_times = 1;
-%filter_m_times = 5;
 gains = [5 2 5 2 5] * 1/4;
 t = 0:1/Fs:0.25;
 
@@ -109,14 +107,12 @@ for i = 1:length(bode_freq)
     x = exp(1j* 2*pi * freq_current * t);
     x_sum = zeros(length(t), 1);
     
-    for n = 1:filter_n_times
         for j = 1:5
             x_out = lsim(b_Lo(j,:),a_Lo(j, :), x, t);
             x_out = lsim(b_Hi(j,:),a_Hi(j,:), x_out, t);
             x_sum = x_sum + gains(j) * x_out;
         end
         
-    end
     H(i) = x_sum(end)/x(end);
 end
 
@@ -138,6 +134,60 @@ for i = 1:5
         xline(center_band(1,i), "-"); % Create centerlines
 end
 hold off
+
+%% Bode Plot Test v2, ends pulled up
+% t, bode_freq, are resued from revious bode plots
+H = zeros(bode_size,1);
+%filter_m_times = 5;
+gains = [5 2 5 2 5] * 1/4;
+t = 0:1/Fs:0.25;
+
+for i = 1:length(bode_freq)
+    freq_current = bode_freq(i);
+    x = exp(1j* 2*pi * freq_current * t);
+    x_sum = zeros(length(t), 1);
+    
+    for j = 1:5
+        if j == 1
+        %lsim low
+        x_band = lsim(b_Lo(j,:),a_Lo(j, :), x, t);
+
+        elseif j == 5
+        %Lsim hi
+        x_band = lsim(b_Hi(j,:),a_Hi(j,:), x, t);
+
+        else % ie i = 2:4
+        %lsim low
+        x_lo = lsim(b_Lo(j,:),a_Lo(j, :), x, t);
+        %Lsim hi
+        x_band = lsim(b_Hi(j,:),a_Hi(j,:), x_lo, t);
+        end
+    
+            x_sum = x_sum + gains(j)*x_band;
+    end      
+    H(i) = x_sum(end)/x(end);
+end
+
+%Calculate magnitude and angle values of complex gain
+H_mag = 20 * log(abs(H));
+H_mag = H_mag(2:end); %Remove initial outlier data point(outside of human hearing)
+
+figure, hold on
+plot(bode_freq(2:end), H_mag, 'linewidth', 1.5) % For some reason semilogx doesnt work here
+set(gca, 'XScale', 'log');
+xlabel('Frequency (Hz)');
+ylabel('Output (dB)');
+xlim([bode_freq(1),bode_freq(end)])
+title("Merged Bandpass Equalizer Output"); 
+%legend(num2str(filter_n_times) + " times", num2str(filter_m_times) + " times");
+for i = 1:5
+    for j = 1:2
+        xline(cutoffs(i,j), "--"); % Create cutoff lines for each center
+    end
+        xline(center_band(1,i), "-"); % Create centerlines
+end
+hold off
+
 %% Read All Audio Files
 clear x, clear x_out, clear x_sum, clear H, clear H_mag
 clear i, clear j
@@ -414,7 +464,7 @@ N = length(sound_BGS);
 frequencies =  (0:N-1) * (Fs_BGS/N);
 
 figure, hold on
-plot(frequencies, fftshift(abs(fft_BGS)));
+plot(frequencies, abs(fft_BGS));
 title('FFT Output Magnitude of Blue in Green with Siren')
 xlabel('Frequency (Hz)')
 ylabel('Magnitude')
