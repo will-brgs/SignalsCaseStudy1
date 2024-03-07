@@ -145,6 +145,7 @@ H_mag = 20 * log(abs(H));
 H_phase = (angle(H));
 
 figure, hold on
+subplot(1,2,1)
 plot(bode_freq, H_mag, 'linewidth', 2.25,'color','b') % For some reason semilogx doesnt work here
 set(gca, 'XScale', 'log');
 xlabel('Frequency (Hz)', 'FontSize', font_size);
@@ -158,9 +159,8 @@ for i = 1:5
     end
         xline(center_band(1,i), "-", 'LineWidth', 1.5); % Create centerlines
 end
-hold off
 
-figure, hold on
+subplot(1,2,2)
 plot(bode_freq, H_phase, 'linewidth', 2.25,'color','r') 
 set(gca, 'XScale', 'log');
 font_size = 14;
@@ -176,7 +176,7 @@ for i = 1:5
         xline(center_band(1,i), "-", 'LineWidth', 1.5); % Create centerlines
 end
 hold off
-%% Design Task 2b: Merged Bode Plot Test  v2, ends pulled up
+%% Design Task 2b: Merged Bode Plot Test  v2, ends pulled up(unsucessful)
 % t, bode_freq, are resued from revious bode plots
 H = zeros(bode_size,1);
 %filter_m_times = 5;
