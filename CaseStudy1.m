@@ -440,7 +440,7 @@ xlabel('Time (s)');
 ylabel('Frequency (Hz)');
 title('Bass Boost Spectrogram');
 hold off
-%% Giant Steps : Unity
+%% Testing Task 3: Giant Steps : Unity
 
 out_GSBC = equalizerFunc(sound_GSBC, Fs_SS, gains_unity, center_band, k_cut);
 
@@ -459,16 +459,41 @@ ylabel(cbar, 'Magnitude (dB)');
 xlabel('Time (s)');
 ylabel('Frequency (Hz)');
 title('Unity Spectrogram');
-%% Giant Steps : Treble Boost
+%% Testing Task 3: Giant Steps : Treble Boost
 
 out_GSBC = equalizerFunc(sound_GSBC, Fs_SS, gains_treble, center_band, k_cut);
 
 sound(sound_GSBC,Fs_SS);
-%% Giant Steps : Bass Boost
+
+subplot(3,1,2)
+s = spectrogram(out_GSBC,hamming(256),round(256/2),1024,Fs_SS);
+imagesc(t, f, 20*log10(abs(s))); % Convert to dB scale for better visualization
+axis xy; % Flip the y-axis to have low frequencies at the bottom
+colormap default
+colorbar;
+cbar = colorbar;
+ylabel(cbar, 'Magnitude (dB)');
+xlabel('Time (s)');
+ylabel('Frequency (Hz)');
+title('Treble Boost Spectrogram');
+%% Testing Task 3: Giant Steps : Bass Boost
 
 out_GSBC = equalizerFunc(sound_GSBC, Fs_SS, gains_bass, center_band, k_cut);
 
 sound(sound_GSBC,Fs_SS);
+
+subplot(3,1,3)
+s = spectrogram(out_GSBC,hamming(256),round(256/2),1024,Fs_SS);
+imagesc(t, f, 20*log10(abs(s))); % Convert to dB scale for better visualization
+axis xy; % Flip the y-axis to have low frequencies at the bottom
+colormap default
+colorbar;
+cbar = colorbar;
+ylabel(cbar, 'Magnitude (dB)');
+xlabel('Time (s)');
+ylabel('Frequency (Hz)');
+title('Bass Boost Spectrogram');
+hold off
 %% Task 3: Filter out Background Noise
 
 %Import Blue in Green with Siren
