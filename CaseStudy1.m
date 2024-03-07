@@ -8,14 +8,10 @@
 close all
 clear
 Fs = 44.1e3; %44.1 kHz Audio Sampling Frequency
-
-disp("leela says hi");
-disp('Will says hi')
-disp('hi will!!!!')
-disp('poopoo peepee!!!')
-%% Task 1: Design Variable Amplification for 5 Band Frequencies
-% Here we will construct the set of linear systems
-%% Task 1: Initialize R and C values for desired cutoff frequencies
+font_size = 14;
+%% Design Task 1: Design Variable Amplification for 5 Band Frequencies
+% The nessecary framework for the equalizer is constructed here
+%% Design Task 1: Initialize R and C values for desired cutoff frequencies
 C = 10e-6; % Consider resistance will be constant at 10uF, R will change to alter cutoff freq
 % Create a vector of R values for Lo and Hi respectively
 R_Lo = zeros(5,1);
@@ -26,7 +22,7 @@ cutoffs = zeros(length(center_band),2); % 1st column lo, 2nd hi
 
 k_cut = 0.25; % Threshod of what magnitude a center frequency will extend past itself
 
-%% R value Allocaton
+%% Design Task 1: R value Allocaton
 for i = 1:5 % Calculate and allocate A and B values for Hi and Lo Coefficients
 
 % Calc Hipass R
@@ -40,8 +36,7 @@ cutoffs(i,2) = cutoff_Lo;
 R_Lo(i) = 1/(2 * pi * C * cutoff_Lo);
 
 end
-clear i, clear k_cut; clear cutoff_Hi, clear cutoff_Lo
-%% Lsim Coefficient Allocation
+%% Design Task 1: Lsim Coefficient Allocation
 %Lowpass Filter Coefficients
 a_Lo = zeros(5, 2);
 a_Lo(:,1) = 1;
@@ -57,10 +52,10 @@ a_Hi(:,2) = 1./(C.*R_Hi);
 b_Hi = zeros(5, 2);
 b_Hi(:,1) = 1;
 
-clear C;
-
-%% Task 2: Test lsim variables by frequency response analysis
-%% Bode Plot Test: Independent Bandpass Filters
+%% Design Task 2: Test lsim variables by frequency response analysis
+% Various bode plots are constructed to quantize the frequency response of
+% the equalizer system
+%% Design Task 2a: Bode Plot Test: Independent Bandpass Filters
 % Generate Bode magnitude plots for all 5 bandpass filters
 bode_size = 100; % How many differnt frequencies we want to test
 bode_freq = logspace(1, 4.25, bode_size); %Generate different frequency vals, 10^4.25 max yeilds close to limit for human hearing
@@ -68,8 +63,9 @@ t = 0:1/Fs:0.25; %Sample timepoint vector
 
 H = zeros(bode_size,1);
 
+% Create bode plot for magnitude response
 figure, hold on
-sgtitle('Bode Plot Outputs for 5 Bandpass Filters')
+sgtitle('Bode Plot Magnitude Response for 5 Bandpass Filters')
 for j = 1:length(center_band)
 for i = 1:length(bode_freq) % Generate bode plot
     freq_current = 2*pi * bode_freq(i); %Convert logspace freq to angular
@@ -86,20 +82,48 @@ end
 H_mag = 20 * log(abs(H)); % Convert output H to dB magnitude
 
 subplot(3,2,j)
-semilogx(bode_freq, H_mag, 'linewidth', 1.5)
+semilogx(bode_freq, H_mag, 'linewidth', 2.25)
 xlim([bode_freq(1),bode_freq(end)])
 xlabel('Frequency (Hz)');
 ylabel('Output (dB)');
 xline(center_band(j), "-");
 xline(cutoffs(j,1), "--"); % Lower Frequency Cutoff
 xline(cutoffs(j,2), "--"); % Upper frequency Cutoff
-title("Bode Plot Magnitude",num2str(center_band(j)) + " Hz Center")
+title("Magnitude Response",num2str(center_band(j)) + " Hz Center Frequency")
 end
-clear x_filter, clear i, clear j, clear x, clear H, clear H_mag,
-%% Bode Plot Test 2: Combined Equalizer
+
+% Repeat plotting but for phase response,
+figure, hold on
+sgtitle('Bode Plot Phase Response for 5 Bandpass Filters')
+for j = 1:length(center_band)
+for i = 1:length(bode_freq) % Generate bode plot
+    freq_current = 2*pi * bode_freq(i); %Convert logspace freq to angular
+    x = exp(1j * freq_current * t);
+
+    % Pass through Both hi and lowpass filters to create bandpass
+    x_filter = lsim(b_Lo(j,:),a_Lo(j,:), x, t);
+    x_filter = lsim(b_Hi(j,:),a_Hi(j,:), x_filter, t);
+
+    H(i) = x_filter(end)/x(end);
+end
+
+%Calculate angle values of complex gain
+H_phase =  angle(H); % Convert output H to dB magnitude
+
+subplot(3,2,j)
+semilogx(bode_freq, H_phase, 'linewidth', 2.25, 'color','r')
+xlim([bode_freq(1),bode_freq(end)])
+xlabel('Frequency (Hz)');
+ylabel('Phase (Radians)');
+xline(center_band(j), "-", 'LineWidth', 1.5);
+xline(cutoffs(j,1), "--", 'LineWidth', 1.5); % Lower Frequency Cutoff
+xline(cutoffs(j,2), "--", 'LineWidth', 1.5); % Upper frequency Cutoff
+title("Bode Plot Phase Response",num2str(center_band(j)) + " Hz Center Frequency")
+end
+%% Design Task 2b: Bode Plot Test 2: Combined Equalizer
 % t, bode_freq, are reused from previous bode plots
 H = zeros(bode_size,1);
-gains = [1 1 1 1 1];
+gains = [5 2 5 2 5] * 1/4;
 t = 0:1/Fs:0.25;
 
 for i = 1:length(bode_freq)
@@ -118,15 +142,15 @@ end
 
 %Calculate magnitude and angle values of complex gain
 H_mag = 20 * log(abs(H));
+H_phase = (angle(H));
 
 figure, hold on
-plot(bode_freq, H_mag, 'linewidth', 2.25) % For some reason semilogx doesnt work here
+plot(bode_freq, H_mag, 'linewidth', 2.25,'color','b') % For some reason semilogx doesnt work here
 set(gca, 'XScale', 'log');
-font_size = 14;
 xlabel('Frequency (Hz)', 'FontSize', font_size);
 ylabel('Output (dB)', 'FontSize', font_size);
 xlim([bode_freq(1),bode_freq(end)])
-title("Merged Bandpass Equalizer Output, No Gains", 'FontSize', font_size); 
+title("Merged Bandpass Equalizer Magnitude Output", 'FontSize', font_size); 
 %legend(num2str(filter_n_times) + " times", num2str(filter_m_times) + " times");
 for i = 1:5
     for j = 1:2
@@ -136,7 +160,23 @@ for i = 1:5
 end
 hold off
 
-%% Bode Plot Test v2, ends pulled up
+figure, hold on
+plot(bode_freq, H_phase, 'linewidth', 2.25,'color','r') 
+set(gca, 'XScale', 'log');
+font_size = 14;
+xlabel('Frequency (Hz)', 'FontSize', font_size);
+ylabel('Phase (Radians)', 'FontSize', font_size);
+xlim([bode_freq(1),bode_freq(end)])
+title("Merged Bandpass Equalizer Phase Output", 'FontSize', font_size); 
+%legend(num2str(filter_n_times) + " times", num2str(filter_m_times) + " times");
+for i = 1:5
+    for j = 1:2
+        xline(cutoffs(i,j), "--", 'LineWidth', 1.5); % Create cutoff lines for each center
+    end
+        xline(center_band(1,i), "-", 'LineWidth', 1.5); % Create centerlines
+end
+hold off
+%% Design Task 2b: Merged Bode Plot Test  v2, ends pulled up
 % t, bode_freq, are resued from revious bode plots
 H = zeros(bode_size,1);
 %filter_m_times = 5;
@@ -171,110 +211,55 @@ end
 
 %Calculate magnitude and angle values of complex gain
 H_mag = 20 * log(abs(H));
-H_mag = H_mag(2:end); %Remove initial outlier data point(outside of human hearing)
+%H_mag = H_mag(1:end); %Remove initial outlier data point(outside of human hearing)
 
 figure, hold on
-plot(bode_freq(2:end), H_mag, 'linewidth', 1.5) % For some reason semilogx doesnt work here
+plot(bode_freq, H_mag, 'linewidth', 2.25,'color','b') 
 set(gca, 'XScale', 'log');
-xlabel('Frequency (Hz)');
-ylabel('Output (dB)');
+font_size = 14;
+xlabel('Frequency (Hz)', 'FontSize', font_size);
+ylabel('Output (dB)', 'FontSize', font_size);
 xlim([bode_freq(1),bode_freq(end)])
-title("Merged Bandpass Equalizer Output"); 
+title("Merged Bandpass Equalizer Magnitude Output", 'FontSize', font_size); 
 %legend(num2str(filter_n_times) + " times", num2str(filter_m_times) + " times");
 for i = 1:5
     for j = 1:2
-        xline(cutoffs(i,j), "--"); % Create cutoff lines for each center
+        xline(cutoffs(i,j), "--", 'LineWidth', 1.5); % Create cutoff lines for each center
     end
-        xline(center_band(1,i), "-"); % Create centerlines
+        xline(center_band(1,i), "-", 'LineWidth', 1.5); % Create centerlines
 end
 hold off
 
-%% Read All Audio Files
-clear x, clear x_out, clear x_sum, clear H, clear H_mag
-clear i, clear j
-
-%Import Blue in Green with Siren
-[sound_BGS] = audioread('Blue in Green with Siren.wav');
-sound_BGS = sound_BGS(:,1);
-
-%Import Giant Steps Bass Cut
-[sound_GSBC] = audioread('Giant Steps Bass Cut.wav');
-sound_GSBC = sound_GSBC(:,1);
-
-%Import piano_noisy
-[sound_PN] = audioread('piano_noisy.wav');
-sound_PN = sound_PN(:,1);
-
-%Import roosevelt_noisy
-[sound_RN] = audioread('roosevelt_noisy.wav');
-sound_RN = sound_RN(:,1);
-
-%Import violin_w_siren
-[sound_VS] = audioread('violin_w_siren.wav');
-sound_VS = sound_VS(:,1);
-
-%% try with audio maybe???
-
-gains_2 = [5 4 3 1 0.5];
-filter_times = [10 5 4 3 3];
-sound_GSBC_time = linspace(0, length(sound_GSBC)/Fs, length(sound_GSBC));
-sound_GSBC_sum = zeros(length(sound_GSBC), 1);
-
-for j = 1:5
-        for n = 1:filter_times(j)
-        sound_GSBC_out = lsim(b_Lo(j,:),a_Lo(j, :), sound_GSBC, sound_GSBC_time);
-        sound_GSBC_out = lsim(b_Hi(j,:),a_Hi(j,:), sound_GSBC_out, sound_GSBC_time);
-        end
-        sound_GSBC_sum = sound_GSBC_sum + gains_2(j) * sound_GSBC_out;
+figure, hold on
+plot(bode_freq, H_phase, 'linewidth', 2.25,'color','r') 
+set(gca, 'XScale', 'log');
+font_size = 14;
+xlabel('Frequency (Hz)', 'FontSize', font_size);
+ylabel('Phase (Radians)', 'FontSize', font_size);
+xlim([bode_freq(1),bode_freq(end)])
+title("Merged Bandpass Equalizer Phase Output", 'FontSize', font_size); 
+%legend(num2str(filter_n_times) + " times", num2str(filter_m_times) + " times");
+for i = 1:5
+if i == 1
+    xline(cutoffs(i,2), "--", 'LineWidth', 1.5); % Create cutoff only on high side
+elseif i == 5
+    xline(cutoffs(i,1), "--", 'LineWidth', 1.5); % Create cutoff only on low side
+else % ie the three center lines
+    for j = 1:2
+    xline(cutoffs(i,j), "--", 'LineWidth', 1.5); % Create cutoff on both sides
+    end
 end
-
-figure();
-hold on
-plot(sound_GSBC_time, sound_GSBC_sum);
-plot(sound_GSBC_time, sound_GSBC);
-hold off
-xlabel("Time (s)"); ylabel("Amplitude");
-legend("Filtered", "Original");
-
-%sound(sound_GSBC_sum, Fs)
-
-%% piano
-Fs = 44100;
-
-sound_PN_time = linspace(0, length(sound_PN)/Fs, length(sound_PN));
-sound_PN_sum = zeros(length(sound_PN), 1);
-gains = [1 0.5 0 0 0];
-
-for j = 1:5
-    sound_PN_out = lsim(b_Lo(j,:),a_Lo(j, :), sound_PN, sound_PN_time);
-    sound_PN_out = lsim(b_Hi(j,:),a_Hi(j,:), sound_PN_out, sound_PN_time);
-    sound_PN_sum = sound_PN_sum + gains(j) * sound_PN_out;
+xline(center_band(1,i), "-", 'LineWidth', 1.5); % Create centerlines
 end
-
-figure();
-hold on
-plot(sound_PN_time, sound_PN_sum);
-plot(sound_PN_time, sound_PN);
 hold off
-xlabel("Time (s)"); ylabel("Amplitude");
-legend("Filtered", "Original");
-
-sound(cast(sound_PN_sum, "double"), Fs);
-
-%% Play Space Station Using Function Implementation
-
-%Import Space Staion - Treble Cut
-[sound_SS,Fs_SS] = audioread('Space Station - Treble Cut.wav');
-sound_SS = sound_SS(:,1);
-
-gains = [1 1 1 3 4];
-center_band = [60, 230, 910, 3e3, 14e3];
-k_cut = 0.2;
-out_SS = equalizerFunc(sound_SS, Fs_SS, gains, center_band, k_cut);
-
-sound(cast(out_SS, "double"), Fs_SS);
-
-%% Treble Boost Equalizer Bode
+%NOTE: From herein out a function will replace the implementation of the
+%equalizer linear simulation, this function is denoted EqualizerFunc
+%% Testing Task 1: Design 3 Audio Presets
+% Here gain presets are chosen to form the merged bandpass equalizer
+% frequency repsonse. This analysis is done via bode plots. Note that phase
+% response is not calculated as it is irrelevent to the way the audio is
+% desired to be filtered
+%% Testing Task 1: Treble Boost
 % t, bode_freq, are resued from revious bode plots
 H = zeros(bode_size,1);
 gains_treble = [1 1 0.75 3 4];
@@ -297,22 +282,22 @@ end
 H_mag = 20 * log(abs(H));
 
 figure, hold on
-plot(bode_freq, H_mag, 'linewidth', 1.5) % For some reason semilogx doesnt work here
+plot(bode_freq, H_mag, 'linewidth', 2.25) % For some reason semilogx doesnt work here
 set(gca, 'XScale', 'log');
-xlabel('Frequency (Hz)');
-ylabel('Output (dB)');
+xlabel('Frequency (Hz)', 'FontSize', font_size);
+ylabel('Output (dB)', 'FontSize', font_size);
 xlim([bode_freq(1),bode_freq(end)])
-title("Treble Boost Equalizer Output"); 
+title("Treble Boost Equalizer Output", 'FontSize', font_size); 
 %legend(num2str(filter_n_times) + " times", num2str(filter_m_times) + " times");
 for i = 1:5
     for j = 1:2
-        xline(cutoffs(i,j), "--"); % Create cutoff lines for each center
+        xline(cutoffs(i,j), "--", 'LineWidth', 1.5); % Create cutoff lines for each center
     end
-        xline(center_band(1,i), "-"); % Create centerlines
+        xline(center_band(1,i), "-", 'LineWidth', 1.5); % Create centerlines
 end
 hold off
 
-%% Bass Boost Equalizer Bode
+%% Testing Task 1: Bass Boost
 % t, bode_freq, are resued from revious bode plots
 H = zeros(bode_size,1);
 gains_bass = [4 3 0.75 1 1.5];
@@ -335,22 +320,22 @@ end
 H_mag = 20 * log(abs(H));
 
 figure, hold on
-plot(bode_freq, H_mag, 'linewidth', 1.5) % For some reason semilogx doesnt work here
+plot(bode_freq, H_mag, 'linewidth', 2.25) % For some reason semilogx doesnt work here
 set(gca, 'XScale', 'log');
-xlabel('Frequency (Hz)');
-ylabel('Output (dB)');
+xlabel('Frequency (Hz)', 'FontSize', font_size);
+ylabel('Output (dB)', 'FontSize', font_size);
 xlim([bode_freq(1),bode_freq(end)])
-title("Bass Boost Equalizer Output"); 
+title("Bass Boost Equalizer Output", 'FontSize', font_size); 
 %legend(num2str(filter_n_times) + " times", num2str(filter_m_times) + " times");
 for i = 1:5
     for j = 1:2
-        xline(cutoffs(i,j), "--"); % Create cutoff lines for each center
+        xline(cutoffs(i,j), "--", 'LineWidth', 1.5); % Create cutoff lines for each center
     end
-        xline(center_band(1,i), "-"); % Create centerlines
+        xline(center_band(1,i), "-", 'LineWidth', 1.5); % Create centerlines
 end
 hold off
 
-%% Unity Equalizer Bode
+%% Testing Task 1: Unity
 % t, bode_freq, are resued from revious bode plots
 H = zeros(bode_size,1);
 filter_n_times = 1;
@@ -376,23 +361,25 @@ H_mag = 20 * log(abs(H));
 H_mag = H_mag(2:end); %Remove initial outlier data point(outside of human hearing)
 
 figure, hold on
-plot(bode_freq(2:end), H_mag, 'linewidth', 1.5) % For some reason semilogx doesnt work here
+plot(bode_freq(2:end), H_mag, 'linewidth', 2.25) % For some reason semilogx doesnt work here
 set(gca, 'XScale', 'log');
-xlabel('Frequency (Hz)');
-ylabel('Output (dB)');
+xlabel('Frequency (Hz)', 'FontSize', font_size);
+ylabel('Output (dB)', 'FontSize', font_size);
 xlim([bode_freq(1),bode_freq(end)])
-title("Unity Equalizer Output"); 
+title("Unity Equalizer Output", 'FontSize', font_size); 
 %legend(num2str(filter_n_times) + " times", num2str(filter_m_times) + " times");
 for i = 1:5
     for j = 1:2
-        xline(cutoffs(i,j), "--"); % Create cutoff lines for each center
+        xline(cutoffs(i,j), "--", 'LineWidth', 1.5); % Create cutoff lines for each center
     end
-        xline(center_band(1,i), "-"); % Create centerlines
+        xline(center_band(1,i), "-", 'LineWidth', 1.5); % Create centerlines
 end
 hold off
 
-%% Assignment 3: Pass preset fitlers through Space Station and Giant Steps
-
+%% Testing Task 2: Pass preset fitlers through Space Station and Giant Steps
+% Here the same audio presets are passed through two sample clips. The code
+% segnemnts are deisnged to be operated independently of one another.
+%% Testing Task 3: Import Audio Files
 %Import Space Station
 [sound_SS,Fs_SS] = audioread('Space Station - Treble Cut.wav');
 sound_SS = sound_SS(:,1);
@@ -400,43 +387,86 @@ sound_SS = sound_SS(:,1);
 %Import giant steps
 [sound_GSBC] = audioread('Giant Steps Bass Cut.wav');
 sound_GSBC = sound_GSBC(:,1);
-%% Space Station : Unity
-center_band = [60, 230, 910, 3e3, 14e3];
-k_cut = 0.2;
+%% Testing Task 3: Space Station : Unity
+
 out_SS = equalizerFunc(sound_SS, Fs_SS, gains_unity, center_band, k_cut);
 
 sound(out_SS,Fs_SS);
-%% Space Station : Treble Boost
-center_band = [60, 230, 910, 3e3, 14e3];
-k_cut = 0.2;
+
+figure, hold on
+sgtitle('Spectrograms For Space Station', 'fontsize',font_size)
+
+subplot(3,1,1)
+[s,f,t] = spectrogram(out_SS,hamming(256),round(256/2),1024,Fs_SS);
+imagesc(t, f, 20*log10(abs(s))); % Convert to dB scale for better visualization
+axis xy; % Flip the y-axis to have low frequencies at the bottom
+colormap default
+colorbar;
+cbar = colorbar;
+ylabel(cbar, 'Magnitude (dB)');
+xlabel('Time (s)');
+ylabel('Frequency (Hz)');
+title('Unity Spectrogram');
+%% Testing Task 3: Space Station : Treble Boost
+
 out_SS = equalizerFunc(sound_SS, Fs_SS, gains_treble, center_band, k_cut);
 
 sound(out_SS,Fs_SS);
+subplot(3,1,2)
+s = spectrogram(out_SS,hamming(256),round(256/2),1024,Fs_SS);
+imagesc(t, f, 20*log10(abs(s))); % Convert to dB scale for better visualization
+axis xy; % Flip the y-axis to have low frequencies at the bottom
+colormap default
+colorbar;
+cbar = colorbar;
+ylabel(cbar, 'Magnitude (dB)');
+xlabel('Time (s)');
+ylabel('Frequency (Hz)');
+title('Treble Boost Spectrogram');
+%% Testing Task 3: Space Station : Bass Boost
 
-%% Space Station : Bass Boost
-center_band = [60, 230, 910, 3e3, 14e3];
-k_cut = 0.2;
 out_SS = equalizerFunc(sound_SS, Fs_SS, gains_bass, center_band, k_cut);
 
 sound(out_SS,Fs_SS);
-
+subplot(3,1,3)
+s = spectrogram(out_SS,hamming(256),round(256/2),1024,Fs_SS);
+imagesc(t, f, 20*log10(abs(s))); % Convert to dB scale for better visualization
+axis xy; % Flip the y-axis to have low frequencies at the bottom
+colormap default
+colorbar;
+cbar = colorbar;
+ylabel(cbar, 'Magnitude (dB)');
+xlabel('Time (s)');
+ylabel('Frequency (Hz)');
+title('Bass Boost Spectrogram');
+hold off
 %% Giant Steps : Unity
-center_band = [60, 230, 910, 3e3, 14e3];
-k_cut = 0.2;
-sound_GSBC = equalizerFunc(sound_GSBC, Fs_SS, gains_unity, center_band, k_cut);
+
+out_GSBC = equalizerFunc(sound_GSBC, Fs_SS, gains_unity, center_band, k_cut);
 
 sound(sound_GSBC,Fs_SS);
+figure, hold on
+sgtitle('Spectrograms For Giant Steps', 'fontsize',font_size)
 
+subplot(3,1,1)
+[s,f,t] = spectrogram(out_GSBC,hamming(256),round(256/2),1024,Fs_SS);
+imagesc(t, f, 20*log10(abs(s))); % Convert to dB scale for better visualization
+axis xy; % Flip the y-axis to have low frequencies at the bottom
+colormap default
+colorbar;
+cbar = colorbar;
+ylabel(cbar, 'Magnitude (dB)');
+xlabel('Time (s)');
+ylabel('Frequency (Hz)');
+title('Unity Spectrogram');
 %% Giant Steps : Treble Boost
-center_band = [60, 230, 910, 3e3, 14e3];
-k_cut = 0.2;
-sound_GSBC = equalizerFunc(sound_GSBC, Fs_SS, gains_treble, center_band, k_cut);
+
+out_GSBC = equalizerFunc(sound_GSBC, Fs_SS, gains_treble, center_band, k_cut);
 
 sound(sound_GSBC,Fs_SS);
 %% Giant Steps : Bass Boost
-center_band = [60, 230, 910, 3e3, 14e3];
-k_cut = 0.2;
-sound_GSBC = equalizerFunc(sound_GSBC, Fs_SS, gains_bass, center_band, k_cut);
+
+out_GSBC = equalizerFunc(sound_GSBC, Fs_SS, gains_bass, center_band, k_cut);
 
 sound(sound_GSBC,Fs_SS);
 %% Task 3: Filter out Background Noise
