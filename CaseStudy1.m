@@ -307,7 +307,7 @@ H_mag = 20 * log(abs(H));
 H_phase= angle(H);
 
 figure, hold on
-subplot(2, 1, 2)
+subplot(2, 1, 1)
 plot(bode_freq, H_mag, 'linewidth', 2.25) % For some reason semilogx doesnt work here
 set(gca, 'XScale', 'log');
 xlabel('Frequency (Hz)', 'FontSize', font_size);
