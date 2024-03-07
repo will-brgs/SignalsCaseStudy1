@@ -145,7 +145,7 @@ H_mag = 20 * log(abs(H));
 H_phase = (angle(H));
 
 figure, hold on
-subplot(2,1,1)
+subplot(1,2,1)
 plot(bode_freq, H_mag, 'linewidth', 2.25,'color','b') % For some reason semilogx doesnt work here
 set(gca, 'XScale', 'log');
 xlabel('Frequency (Hz)', 'FontSize', font_size);
@@ -160,7 +160,7 @@ for i = 1:5
         xline(center_band(1,i), "-", 'LineWidth', 1.5); % Create centerlines
 end
 
-subplot(2,1,2)
+subplot(1,2,2)
 plot(bode_freq, H_phase, 'linewidth', 2.25,'color','r') 
 set(gca, 'XScale', 'log');
 font_size = 14;
@@ -176,11 +176,11 @@ for i = 1:5
         xline(center_band(1,i), "-", 'LineWidth', 1.5); % Create centerlines
 end
 hold off
-%% Design Task 2b: Merged Bode Plot Test, ends pulled up(unsucessful)
+%% Design Task 2b: Merged Bode Plot Test  v2, ends pulled up(unsucessful)
 % t, bode_freq, are resued from revious bode plots
 H = zeros(bode_size,1);
 %filter_m_times = 5;
-gains = [1 1 1 1 1];
+gains = [5 2 5 2 5] * 1/4;
 t = 0:1/Fs:0.25;
 
 for i = 1:length(bode_freq)
@@ -214,14 +214,13 @@ H_mag = 20 * log(abs(H));
 %H_mag = H_mag(1:end); %Remove initial outlier data point(outside of human hearing)
 
 figure, hold on
-subplot(2, 1, 1)
 plot(bode_freq, H_mag, 'linewidth', 2.25,'color','b') 
 set(gca, 'XScale', 'log');
 font_size = 14;
 xlabel('Frequency (Hz)', 'FontSize', font_size);
 ylabel('Output (dB)', 'FontSize', font_size);
 xlim([bode_freq(1),bode_freq(end)])
-title("Ends Pulled Up Bandpass Equalizer Magnitude", 'FontSize', font_size); 
+title("Merged Bandpass Equalizer Magnitude Output", 'FontSize', font_size); 
 %legend(num2str(filter_n_times) + " times", num2str(filter_m_times) + " times");
 for i = 1:5
     for j = 1:2
@@ -229,15 +228,16 @@ for i = 1:5
     end
         xline(center_band(1,i), "-", 'LineWidth', 1.5); % Create centerlines
 end
+hold off
 
-subplot(2, 1, 2)
+figure, hold on
 plot(bode_freq, H_phase, 'linewidth', 2.25,'color','r') 
 set(gca, 'XScale', 'log');
 font_size = 14;
 xlabel('Frequency (Hz)', 'FontSize', font_size);
 ylabel('Phase (Radians)', 'FontSize', font_size);
 xlim([bode_freq(1),bode_freq(end)])
-title("Ends Pulled Up Bandpass Equalizer Phase", 'FontSize', font_size); 
+title("Merged Bandpass Equalizer Phase Output", 'FontSize', font_size); 
 %legend(num2str(filter_n_times) + " times", num2str(filter_m_times) + " times");
 for i = 1:5
 if i == 1
@@ -254,6 +254,29 @@ end
 hold off
 %NOTE: From herein out a function will replace the implementation of the
 %equalizer linear simulation, this function is denoted EqualizerFunc
+
+%% Design Task 2c: Impulse Response of each Bandpass Filter
+
+t = linspace(0, 0.0003, 1000);
+impulse = zeros(length(t), 1);
+impulse(1) = 1;
+impulse_responses_filters = zeros(length(t), 5);
+
+for i = 1:5
+    impulse_responses_filters(:, i) = lsim(b_Lo(i, :), a_Lo(i, :), impulse, t);
+    impulse_responses_filters(:, i) = lsim(b_Hi(i, :), a_Hi(i, :), impulse_responses_filters(:, i), t);
+end
+
+figure()
+hold on
+for i = 1:5
+    plot(t,impulse_responses_filters(:, i));
+end
+hold off
+xlabel("Time (s)");
+ylabel("Amplitude");
+legend("Bass Filter", "Mid-Bass Filter", "Mid Filter", "High-Mid Filter", "High Filter");
+title("Impulse Responses of Individual Band-pass Filters");
 %% Testing Task 1: Design 3 Audio Presets
 % Here gain presets are chosen to form the merged bandpass equalizer
 % frequency repsonse. This analysis is done via bode plots. Note that phase
@@ -280,32 +303,15 @@ end
 
 %Calculate magnitude and angle values of complex gain
 H_mag = 20 * log(abs(H));
-H_phase = (angle(H));
 
 figure, hold on
-subplot(2, 1, 1)
 plot(bode_freq, H_mag, 'linewidth', 2.25) % For some reason semilogx doesnt work here
 set(gca, 'XScale', 'log');
 xlabel('Frequency (Hz)', 'FontSize', font_size);
 ylabel('Output (dB)', 'FontSize', font_size);
 xlim([bode_freq(1),bode_freq(end)])
-title("Treble Boost Equalizer Magnitude", 'FontSize', font_size); 
+title("Treble Boost Equalizer Output", 'FontSize', font_size); 
 %legend(num2str(filter_n_times) + " times", num2str(filter_m_times) + " times");
-for i = 1:5
-    for j = 1:2
-        xline(cutoffs(i,j), "--", 'LineWidth', 1.5); % Create cutoff lines for each center
-    end
-        xline(center_band(1,i), "-", 'LineWidth', 1.5); % Create centerlines
-end
-
-
-subplot(2, 1, 2)
-plot(bode_freq, H_phase, 'linewidth', 2.25, 'Color', 'r') % For some reason semilogx doesnt work here
-set(gca, 'XScale', 'log');
-xlabel('Frequency (Hz)', 'FontSize', font_size);
-ylabel('Output (dB)', 'FontSize', font_size);
-xlim([bode_freq(1),bode_freq(end)])
-title("Treble Boost Equalizer Phase", 'FontSize', font_size);
 for i = 1:5
     for j = 1:2
         xline(cutoffs(i,j), "--", 'LineWidth', 1.5); % Create cutoff lines for each center
@@ -335,31 +341,15 @@ end
 
 %Calculate magnitude and angle values of complex gain
 H_mag = 20 * log(abs(H));
-H_phase = angle(H);
 
 figure, hold on
-subplot(2, 1, 1)
 plot(bode_freq, H_mag, 'linewidth', 2.25) % For some reason semilogx doesnt work here
 set(gca, 'XScale', 'log');
 xlabel('Frequency (Hz)', 'FontSize', font_size);
 ylabel('Output (dB)', 'FontSize', font_size);
 xlim([bode_freq(1),bode_freq(end)])
-title("Bass Boost Equalizer Magnitude", 'FontSize', font_size); 
+title("Bass Boost Equalizer Output", 'FontSize', font_size); 
 %legend(num2str(filter_n_times) + " times", num2str(filter_m_times) + " times");
-for i = 1:5
-    for j = 1:2
-        xline(cutoffs(i,j), "--", 'LineWidth', 1.5); % Create cutoff lines for each center
-    end
-        xline(center_band(1,i), "-", 'LineWidth', 1.5); % Create centerlines
-end
-
-subplot(2, 1, 2)
-plot(bode_freq, H_phase, 'linewidth', 2.25, 'Color', 'r') % For some reason semilogx doesnt work here
-set(gca, 'XScale', 'log');
-xlabel('Frequency (Hz)', 'FontSize', font_size);
-ylabel('Output (dB)', 'FontSize', font_size);
-xlim([bode_freq(1),bode_freq(end)])
-title("Bass Boost Equalizer Phase", 'FontSize', font_size);
 for i = 1:5
     for j = 1:2
         xline(cutoffs(i,j), "--", 'LineWidth', 1.5); % Create cutoff lines for each center
@@ -392,31 +382,15 @@ end
 %Calculate magnitude and angle values of complex gain
 H_mag = 20 * log(abs(H));
 H_mag = H_mag(2:end); %Remove initial outlier data point(outside of human hearing)
-H_phase = angle(H);
 
 figure, hold on
-subplot(2,1,1)
 plot(bode_freq(2:end), H_mag, 'linewidth', 2.25) % For some reason semilogx doesnt work here
 set(gca, 'XScale', 'log');
 xlabel('Frequency (Hz)', 'FontSize', font_size);
 ylabel('Output (dB)', 'FontSize', font_size);
 xlim([bode_freq(1),bode_freq(end)])
-title("Unity Equalizer Magnitude", 'FontSize', font_size); 
+title("Unity Equalizer Output", 'FontSize', font_size); 
 %legend(num2str(filter_n_times) + " times", num2str(filter_m_times) + " times");
-for i = 1:5
-    for j = 1:2
-        xline(cutoffs(i,j), "--", 'LineWidth', 1.5); % Create cutoff lines for each center
-    end
-        xline(center_band(1,i), "-", 'LineWidth', 1.5); % Create centerlines
-end
-
-subplot(2, 1, 2)
-plot(bode_freq, H_phase, 'linewidth', 2.25, 'Color', 'r') % For some reason semilogx doesnt work here
-set(gca, 'XScale', 'log');
-xlabel('Frequency (Hz)', 'FontSize', font_size);
-ylabel('Output (dB)', 'FontSize', font_size);
-xlim([bode_freq(1),bode_freq(end)])
-title("Unity Equalizer Phase", 'FontSize', font_size);
 for i = 1:5
     for j = 1:2
         xline(cutoffs(i,j), "--", 'LineWidth', 1.5); % Create cutoff lines for each center
