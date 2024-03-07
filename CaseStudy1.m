@@ -379,22 +379,22 @@ hold off
 %% Testing Task 2: Pass preset fitlers through Space Station and Giant Steps
 % Here the same audio presets are passed through two sample clips. The code
 % segnemnts are deisnged to be operated independently of one another.
-%% Testing Task 3: Import Audio Files
+%% Testing Task 2: Import Audio Files
 %Import Space Station
 [sound_SS,Fs_SS] = audioread('Space Station - Treble Cut.wav');
 sound_SS = sound_SS(:,1);
 
 %Import giant steps
-[sound_GSBC] = audioread('Giant Steps Bass Cut.wav');
+[sound_GSBC,Fs_GSBC] = audioread('Giant Steps Bass Cut.wav');
 sound_GSBC = sound_GSBC(:,1);
-%% Testing Task 3: Space Station : Unity
+%% Testing Task 2: Space Station : Unity
 
 out_SS = equalizerFunc(sound_SS, Fs_SS, gains_unity, center_band, k_cut);
 
 sound(out_SS,Fs_SS);
 
 figure, hold on
-sgtitle('Spectrograms For Space Station', 'fontsize',font_size)
+sgtitle('Spectrograms for Space Station', 'fontsize',font_size)
 
 subplot(3,1,1)
 [s,f,t] = spectrogram(out_SS,hamming(256),round(256/2),1024,Fs_SS);
@@ -407,7 +407,7 @@ ylabel(cbar, 'Magnitude (dB)');
 xlabel('Time (s)');
 ylabel('Frequency (Hz)');
 title('Unity Spectrogram');
-%% Testing Task 3: Space Station : Treble Boost
+%% Testing Task 2: Space Station : Treble Boost
 
 out_SS = equalizerFunc(sound_SS, Fs_SS, gains_treble, center_band, k_cut);
 
@@ -423,7 +423,7 @@ ylabel(cbar, 'Magnitude (dB)');
 xlabel('Time (s)');
 ylabel('Frequency (Hz)');
 title('Treble Boost Spectrogram');
-%% Testing Task 3: Space Station : Bass Boost
+%% Testing Task 2: Space Station : Bass Boost
 
 out_SS = equalizerFunc(sound_SS, Fs_SS, gains_bass, center_band, k_cut);
 
@@ -440,16 +440,16 @@ xlabel('Time (s)');
 ylabel('Frequency (Hz)');
 title('Bass Boost Spectrogram');
 hold off
-%% Testing Task 3: Giant Steps : Unity
+%% Testing Task 2: Giant Steps : Unity
 
-out_GSBC = equalizerFunc(sound_GSBC, Fs_SS, gains_unity, center_band, k_cut);
+out_GSBC = equalizerFunc(sound_GSBC, Fs_GSBC, gains_unity, center_band, k_cut);
 
-sound(sound_GSBC,Fs_SS);
+sound(sound_GSBC,Fs_GSBC);
 figure, hold on
-sgtitle('Spectrograms For Giant Steps', 'fontsize',font_size)
+sgtitle('Spectrograms for Giant Steps', 'fontsize',font_size)
 
 subplot(3,1,1)
-[s,f,t] = spectrogram(out_GSBC,hamming(256),round(256/2),1024,Fs_SS);
+[s,f,t] = spectrogram(out_GSBC,hamming(256),round(256/2),1024,Fs_GSBC);
 imagesc(t, f, 20*log10(abs(s))); % Convert to dB scale for better visualization
 axis xy; % Flip the y-axis to have low frequencies at the bottom
 colormap default
@@ -459,14 +459,14 @@ ylabel(cbar, 'Magnitude (dB)');
 xlabel('Time (s)');
 ylabel('Frequency (Hz)');
 title('Unity Spectrogram');
-%% Testing Task 3: Giant Steps : Treble Boost
+%% Testing Task 2: Giant Steps : Treble Boost
 
-out_GSBC = equalizerFunc(sound_GSBC, Fs_SS, gains_treble, center_band, k_cut);
+out_GSBC = equalizerFunc(sound_GSBC, Fs_GSBC, gains_treble, center_band, k_cut);
 
-sound(sound_GSBC,Fs_SS);
+sound(sound_GSBC,Fs_GSBC);
 
 subplot(3,1,2)
-s = spectrogram(out_GSBC,hamming(256),round(256/2),1024,Fs_SS);
+s = spectrogram(out_GSBC,hamming(256),round(256/2),1024,Fs_GSBC);
 imagesc(t, f, 20*log10(abs(s))); % Convert to dB scale for better visualization
 axis xy; % Flip the y-axis to have low frequencies at the bottom
 colormap default
@@ -476,11 +476,11 @@ ylabel(cbar, 'Magnitude (dB)');
 xlabel('Time (s)');
 ylabel('Frequency (Hz)');
 title('Treble Boost Spectrogram');
-%% Testing Task 3: Giant Steps : Bass Boost
+%% Testing Task 2: Giant Steps : Bass Boost
 
-out_GSBC = equalizerFunc(sound_GSBC, Fs_SS, gains_bass, center_band, k_cut);
+out_GSBC = equalizerFunc(sound_GSBC, Fs_GSBC, gains_bass, center_band, k_cut);
 
-sound(sound_GSBC,Fs_SS);
+sound(sound_GSBC,Fs_GSBC);
 
 subplot(3,1,3)
 s = spectrogram(out_GSBC,hamming(256),round(256/2),1024,Fs_SS);
@@ -494,55 +494,98 @@ xlabel('Time (s)');
 ylabel('Frequency (Hz)');
 title('Bass Boost Spectrogram');
 hold off
-%% Task 3: Filter out Background Noise
+%% Testing Task 3: Filter out Background Noise
+% A sample audio file of 'blue in green' has been provided, but with
+% signficant background noise. The goal is to remove the background siren
+% by creating a custom gain setting
 
 %Import Blue in Green with Siren
 [sound_BGS, Fs_BGS] = audioread('Blue in Green with Siren.wav');
 sound_BGS = sound_BGS(:,1);
 
-%% Use a FFT To determine the frequency of background siren
-
-fft_BGS = fft(sound_BGS);
-N = length(sound_BGS);
-frequencies =  (0:N-1) * (Fs_BGS/N);
+%% Testing Task 3: Create Spectrogram to Observe Problematic Frequencies
+sound(sound_BGS,Fs_BGS);
 
 figure, hold on
-plot(frequencies, abs(fft_BGS));
-title('FFT Output Magnitude of Blue in Green with Siren')
-xlabel('Frequency (Hz)')
-ylabel('Magnitude')
-hold off
-%% Use Specialized Gain Filter to Remove Siren Noise
-gains_BGS = [0.00001 ,0.001 ,0.001 ,2, 0.4];
-center_band = [60, 230, 910, 3e3, 14e3];
+sgtitle('Spectrograms for Giant Steps w/ Siren', 'fontsize',font_size)
+
+subplot(2,1,1)
+[s,f,t] = spectrogram(sound_BGS,hamming(256),round(256/2),1024,Fs_BGS);
+imagesc(t, f, 20*log10(abs(s))); % Convert to dB scale for better visualization
+axis xy; % Flip the y-axis to have low frequencies at the bottom
+colormap default
+colorbar;
+cbar = colorbar;
+ylabel(cbar, 'Magnitude (dB)');
+xlabel('Time (s)');
+ylabel('Frequency (Hz)');
+title('Orignial Audio File Spectrogram');
+%% Testing Task 3: Use Specialized Gain Filter to Remove Siren Noise
+gains_BGS = [1 ,1e-2 ,1e-6 ,1e-2, 1];
+center_band = [60, 730, 1546, 3e3, 14e3]; %adjust center band to attempt to cut out 1546Hz frequency
 k_cut = 0.2;
 out_BGS = equalizerFunc(sound_BGS, Fs_BGS, gains_BGS, center_band, k_cut);
 
 sound(out_BGS,Fs_BGS);
-% Compare filtered sound to original via FFT
-fft_BGS_out = fft(out_BGS);
-
-figure, hold on
-plot(frequencies, fftshift(abs(fft_BGS)));
-plot(frequencies, fftshift(abs(fft_BGS_out)));
-legend('Original sound', 'Output sound');
-title('FFT Output Magnitude of Blue in Green with Siren')
-xlabel('Frequency (Hz)')
-ylabel('Magnitude')
+%Generate spectrogram
+subplot(2,1,2)
+s = spectrogram(out_BGS,hamming(256),round(256/2),1024,Fs_BGS);
+imagesc(t, f, 20*log10(abs(s))); % Convert to dB scale for better visualization
+axis xy; % Flip the y-axis to have low frequencies at the bottom
+colormap default
+colorbar;
+cbar = colorbar;
+ylabel(cbar, 'Magnitude (dB)');
+xlabel('Time (s)');
+ylabel('Frequency (Hz)');
+title('Custom Filter Output Spectrogram');
 hold off
-
-%% Task 4: Modify a Custom Sound File
-
-%% Play original sound
+%% Testing Task 4: Modify a Custom Sound File
+% For this section a simple soundclip of somebody saying the word bruh was
+% used. the goal was to recreate a trend of internet humor and increase the
+% bass to massive levels. The goal was to break the audio as much as
+% possible in the name of science.
+%% Testing Task 4: Play original sound
 [sound_Custom, Fs_Custom] = audioread('Bruh.mp4');
 sound_Custom = sound_Custom(:,1);
 
 sound(sound_Custom,Fs_Custom);
+[s_og,f,t] = spectrogram(sound_Custom,hamming(256),round(256/2),1024,Fs_Custom);
 
-%% Modify and play custom Output
-gains_Custom = [0.00001 ,0.001 ,0.001 ,2, 10000];
+
+%% Testing Task 4: Modify and play custom Output
+gains_Custom = [1 ,0.001 ,0.001 ,2, 1];
 center_band = [60, 230, 910, 3e3, 14e3];
 k_cut = 0.2;
 out_Custom = equalizerFunc(sound_Custom, Fs_BGS, gains_Custom, center_band, k_cut);
 
 sound(out_Custom,Fs_Custom);
+s_new = spectrogram(out_Custom,hamming(256),round(256/2),1024,Fs_Custom);
+s_new = 20*log10(abs(s_new));
+
+s_og = 20*log10(abs(s_og));
+
+
+max_db = max([s_og,s_new]);
+min_db = min([s_og,s_new]);
+
+figure, hold on
+sgtitle('Spectrograms for Custom Audio Modification', 'fontsize',font_size)
+subplot(2,1,1)
+imagesc(t, f, s_og); % Convert to dB scale for better visualization
+ylabel(cbar, 'Magnitude (dB)');
+xlabel('Time (s)');
+ylabel('Frequency (Hz)');
+title('Original Audio Clip Spectrogram');
+axis xy; % Flip the y-axis to have low frequencies at the bottom
+
+subplot(2,1,2)
+imagesc(t, f, 20*log10(abs(s_new))); % Convert to dB scale for better visualization
+axis xy; % Flip the y-axis to have low frequencies at the bottom
+colormap default
+colorbar;
+cbar = colorbar;
+ylabel(cbar, 'Magnitude (dB)');
+xlabel('Time (s)');
+ylabel('Frequency (Hz)');
+title('Modified Audio Clip Spectrogram');
