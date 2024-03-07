@@ -400,10 +400,11 @@ subplot(3,1,1)
 [s,f,t] = spectrogram(out_SS,hamming(256),round(256/2),1024,Fs_SS);
 imagesc(t, f, 20*log10(abs(s))); % Convert to dB scale for better visualization
 axis xy; % Flip the y-axis to have low frequencies at the bottom
-colormap default
+clim([-100,70]);
 colorbar;
 cbar = colorbar;
-ylabel(cbar, 'Magnitude (dB)');
+colormap default
+ylabel(cbar,'Magnitude (dB)');
 xlabel('Time (s)');
 ylabel('Frequency (Hz)');
 title('Unity Spectrogram');
@@ -419,7 +420,9 @@ axis xy; % Flip the y-axis to have low frequencies at the bottom
 colormap default
 colorbar;
 cbar = colorbar;
-ylabel(cbar, 'Magnitude (dB)');
+
+clim([-100,70]);
+ylabel(cbar,'Magnitude (dB)');
 xlabel('Time (s)');
 ylabel('Frequency (Hz)');
 title('Treble Boost Spectrogram');
@@ -435,7 +438,8 @@ axis xy; % Flip the y-axis to have low frequencies at the bottom
 colormap default
 colorbar;
 cbar = colorbar;
-ylabel(cbar, 'Magnitude (dB)');
+clim([-100,70]);
+ylabel(cbar,'Magnitude (dB)');
 xlabel('Time (s)');
 ylabel('Frequency (Hz)');
 title('Bass Boost Spectrogram');
@@ -455,6 +459,7 @@ axis xy; % Flip the y-axis to have low frequencies at the bottom
 colormap default
 colorbar;
 cbar = colorbar;
+clim([-100,70]);
 ylabel(cbar, 'Magnitude (dB)');
 xlabel('Time (s)');
 ylabel('Frequency (Hz)');
@@ -472,6 +477,7 @@ axis xy; % Flip the y-axis to have low frequencies at the bottom
 colormap default
 colorbar;
 cbar = colorbar;
+clim([-100,70]);
 ylabel(cbar, 'Magnitude (dB)');
 xlabel('Time (s)');
 ylabel('Frequency (Hz)');
@@ -489,6 +495,7 @@ axis xy; % Flip the y-axis to have low frequencies at the bottom
 colormap default
 colorbar;
 cbar = colorbar;
+clim([-100,70]);
 ylabel(cbar, 'Magnitude (dB)');
 xlabel('Time (s)');
 ylabel('Frequency (Hz)');
@@ -515,7 +522,7 @@ imagesc(t, f, 20*log10(abs(s))); % Convert to dB scale for better visualization
 axis xy; % Flip the y-axis to have low frequencies at the bottom
 colormap default
 colorbar;
-cbar = colorbar;
+clim([-100,70]);
 ylabel(cbar, 'Magnitude (dB)');
 xlabel('Time (s)');
 ylabel('Frequency (Hz)');
@@ -535,6 +542,7 @@ axis xy; % Flip the y-axis to have low frequencies at the bottom
 colormap default
 colorbar;
 cbar = colorbar;
+clim([-100,70]);
 ylabel(cbar, 'Magnitude (dB)');
 xlabel('Time (s)');
 ylabel('Frequency (Hz)');
@@ -554,30 +562,26 @@ sound(sound_Custom,Fs_Custom);
 
 
 %% Testing Task 4: Modify and play custom Output
-gains_Custom = [1 ,0.001 ,0.001 ,2, 1];
+gains_Custom = [1e4 ,0.001 ,0.001 ,2, 1];
 center_band = [60, 230, 910, 3e3, 14e3];
 k_cut = 0.2;
 out_Custom = equalizerFunc(sound_Custom, Fs_BGS, gains_Custom, center_band, k_cut);
-
+cbar = colorbar;
 sound(out_Custom,Fs_Custom);
 s_new = spectrogram(out_Custom,hamming(256),round(256/2),1024,Fs_Custom);
-s_new = 20*log10(abs(s_new));
-
-s_og = 20*log10(abs(s_og));
-
-
-max_db = max([s_og,s_new]);
-min_db = min([s_og,s_new]);
 
 figure, hold on
 sgtitle('Spectrograms for Custom Audio Modification', 'fontsize',font_size)
 subplot(2,1,1)
-imagesc(t, f, s_og); % Convert to dB scale for better visualization
-ylabel(cbar, 'Magnitude (dB)');
+imagesc(t, f, 20*log10(abs(s_og))); % Convert to dB scale for better visualization
+axis xy; % Flip the y-axis to have low frequencies at the bottom
 xlabel('Time (s)');
 ylabel('Frequency (Hz)');
 title('Original Audio Clip Spectrogram');
-axis xy; % Flip the y-axis to have low frequencies at the bottom
+colormap default
+colorbar;
+ylabel(cbar, 'Magnitude (dB)');
+clim([-100,70]);
 
 subplot(2,1,2)
 imagesc(t, f, 20*log10(abs(s_new))); % Convert to dB scale for better visualization
@@ -586,6 +590,7 @@ colormap default
 colorbar;
 cbar = colorbar;
 ylabel(cbar, 'Magnitude (dB)');
+clim([-100,70]);
 xlabel('Time (s)');
 ylabel('Frequency (Hz)');
 title('Modified Audio Clip Spectrogram');
