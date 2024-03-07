@@ -278,44 +278,6 @@ ylabel("Amplitude");
 legend("Bass Filter", "Mid-Bass Filter", "Mid Filter", "High-Mid Filter", "High Filter");
 title("Impulse Responses of Individual Band-pass Filters");
 
-%% Design Task 2d: Impulse Response of Treble Boost, Bass Boost, and Unity
-
-t = linspace(0, 0.0003, 1000);
-impulse = zeros(length(t), 1);
-impulse(1) = 1;
-impulse_responses_filters = zeros(length(t), 5);
-
-treble_imp_sum = 0;
-bass_imp_sum = 0;
-unity_imp_sum = 0;
-for i = 1:5
-    %Treble impulse calculations
-    treble_imp = lsim(b_Lo(i, :), a_Lo(i, :), impulse, t);
-    treble_imp = lsim(b_Hi(i, :), a_Hi(i, :), treble_imp, t);
-    treble_imp_sum = treble_imp_sum+gains_treble(i)*treble_imp;
-
-    %Bass impulse calculations
-    bass_imp = lsim(b_Lo(i, :), a_Lo(i, :), impulse, t);
-    bass_imp = lsim(b_Hi(i, :), a_Hi(i, :), bass_imp, t);
-    bass_imp_sum = bass_imp_sum+gains_bass(i)*bass_imp;
-
-    %unity impulse calculations
-    unity_imp = lsim(b_Lo(i, :), a_Lo(i, :), impulse, t);
-    unity_imp = lsim(b_Hi(i, :), a_Hi(i, :), unity_imp, t);
-    unity_imp_sum = unity_imp_sum+gains_unity(i)*unity_imp;
-end
-
-figure()
-hold on
-plot(t,treble_imp_sum, 'lineWidth', 2.25);
-plot(t,bass_imp_sum, 'lineWidth', 2.25);
-plot(t,unity_imp_sum, 'lineWidth', 2.25, 'Color', 'g');
-xlabel("Time (s)", 'FontSize', font_size);
-ylabel("Amplitude", 'FontSize', font_size);
-legend("Treble Boost", "Bass Boost", "Unity");
-title("Impulse Responses of Treble, Bass and Unity Functions", 'FontSize', font_size);
-hold off
-
 %% Testing Task 1: Design 3 Audio Presets
 % Here gain presets are chosen to form the merged bandpass equalizer
 % frequency repsonse. This analysis is done via bode plots. Note that phase
@@ -487,6 +449,44 @@ for i = 1:5
     end
         xline(center_band(1,i), "-", 'LineWidth', 1.5); % Create centerlines
 end
+hold off
+
+%% Design Task 2d: Impulse Response of Treble Boost, Bass Boost, and Unity
+
+t = linspace(0, 0.0003, 1000);
+impulse = zeros(length(t), 1);
+impulse(1) = 1;
+impulse_responses_filters = zeros(length(t), 5);
+
+treble_imp_sum = 0;
+bass_imp_sum = 0;
+unity_imp_sum = 0;
+for i = 1:5
+    %Treble impulse calculations
+    treble_imp = lsim(b_Lo(i, :), a_Lo(i, :), impulse, t);
+    treble_imp = lsim(b_Hi(i, :), a_Hi(i, :), treble_imp, t);
+    treble_imp_sum = treble_imp_sum+gains_treble(i)*treble_imp;
+
+    %Bass impulse calculations
+    bass_imp = lsim(b_Lo(i, :), a_Lo(i, :), impulse, t);
+    bass_imp = lsim(b_Hi(i, :), a_Hi(i, :), bass_imp, t);
+    bass_imp_sum = bass_imp_sum+gains_bass(i)*bass_imp;
+
+    %unity impulse calculations
+    unity_imp = lsim(b_Lo(i, :), a_Lo(i, :), impulse, t);
+    unity_imp = lsim(b_Hi(i, :), a_Hi(i, :), unity_imp, t);
+    unity_imp_sum = unity_imp_sum+gains_unity(i)*unity_imp;
+end
+
+figure()
+hold on
+plot(t,treble_imp_sum, 'lineWidth', 2.25);
+plot(t,bass_imp_sum, 'lineWidth', 2.25);
+plot(t,unity_imp_sum, 'lineWidth', 2.25, 'Color', 'g');
+xlabel("Time (s)", 'FontSize', font_size);
+ylabel("Amplitude", 'FontSize', font_size);
+legend("Treble Boost", "Bass Boost", "Unity");
+title("Impulse Responses of Treble, Bass and Unity Functions", 'FontSize', font_size);
 hold off
 
 %% Testing Task 2: Pass preset fitlers through Space Station and Giant Steps
