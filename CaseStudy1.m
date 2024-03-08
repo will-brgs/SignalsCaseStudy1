@@ -123,7 +123,7 @@ end
 %% Design Task 2b: Bode Plot Test 2: Combined Equalizer
 % t, bode_freq, are reused from previous bode plots
 H = zeros(bode_size,1);
-gains = [5 2 5 2 5] * 1/4;
+gains = [1 1 1 1 1];
 t = 0:1/Fs:0.25;
 
 for i = 1:length(bode_freq)
@@ -145,7 +145,7 @@ H_mag = 20 * log(abs(H));
 H_phase = (angle(H));
 
 figure, hold on
-subplot(1,2,1)
+subplot(2,1,1)
 plot(bode_freq, H_mag, 'linewidth', 2.25,'color','b') % For some reason semilogx doesnt work here
 set(gca, 'XScale', 'log');
 xlabel('Frequency (Hz)', 'FontSize', font_size);
@@ -160,7 +160,7 @@ for i = 1:5
         xline(center_band(1,i), "-", 'LineWidth', 1.5); % Create centerlines
 end
 
-subplot(1,2,2)
+subplot(2,1,2)
 plot(bode_freq, H_phase, 'linewidth', 2.25,'color','r') 
 set(gca, 'XScale', 'log');
 font_size = 14;
